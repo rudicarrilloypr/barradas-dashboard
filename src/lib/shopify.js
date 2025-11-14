@@ -32,3 +32,8 @@ export async function getProducts() {
   const data = await shopifyRequest('products.json?limit=20');
   return data.products || [];
 }
+
+export async function getOrders() {
+  const data = await shopifyRequest('orders.json?limit=20&status=any');
+  return data.orders || [];
+}

@@ -1,10 +1,91 @@
-export default function SalesPage() {
+// src/app/sales/page.js
+import { getOrders } from '../../src/lib/shopify';
+
+function formatCurrency(amount) {
+  if (!amount) return '$0';
+  return new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+  }).format(parseFloat(amount));
+}
+
+export default async function SalesPage() {
+  let orders = [];
+
+  try {
+    orders = await getOrders();
+  } catch (error) {
+    console.error(error);
+  }
+
+  // Calcular total de ventas de estas órdenes
+  const totalSales = orders.reduce((sum, order) => {
+    const n = parseFloat(order.total_price || 0);
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-50 mb-2">Sales</h1>
-      <p className="text-sm text-slate-400">
-        Aquí mostraremos gráficos y tablas de órdenes, ingresos y conversiones desde Shopify.
+      <h1 className="text-2xl font-semibold text-slate-50 mb-2">
+        Sales
+      </h1>
+      <p className="text-sm text-slate-400 mb-4">
+        Órdenes recientes obtenidas desde Shopify.
       </p>
+
+      <div className="mb-4 bg-slate-900/70 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-wide text-slate-400">
+            Ventas totales (muestra actual)
+          </div>
+          <div className="text-xl font-semibold text-slate-50">
+            {formatCurrency(totalSales)}
+          </div>
+        </div>
+        <div className="text-sm text-slate-400">
+          Órdenes listadas: <span className="text-slate-100">{orders.length}</span>
+        </div>
+      </div>
+
+      {orders.length === 0 ? (
+        <div className="text-sm text-slate-500">
+          No se encontraron órdenes.  
+          (Puede ser que todavía no haya ventas en la tienda o que falten permisos de lectura de órdenes.)
+        </div>
+      ) : (
+        <div className="border border-slate-800 rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-900 border-b border-slate-800">
+              <tr>
+                <th className="px-4 py-2 text-left text-slate-300">ID</th>
+                <th className="px-4 py-2 text-left text-slate-300">Cliente</th>
+                <th className="px-4 py-2 text-left text-slate-300">Total</th>
+                <th className="px-4 py-2 text-left text-slate-300">Estado</th>
+                <th className="px-4 py-2 text-left text-slate-300">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((o) => (
+                <tr key={o.id} className="border-b border-slate-900/60">
+                  <td className="px-4 py-2 text-slate-200">{o.name}</td>
+                  <td className="px-4 py-2 text-slate-300">
+                    {o.customer ? `${o.customer.first_name || ''} ${o.customer.last_name || ''}`.trim() || '—' : '—'}
+                  </td>
+                  <td className="px-4 py-2 text-slate-200">
+                    {formatCurrency(o.total_price)}
+                  </td>
+                  <td className="px-4 py-2 text-slate-400 capitalize">
+                    {o.financial_status || '—'}
+                  </td>
+                  <td className="px-4 py-2 text-slate-500 text-xs">
+                    {new Date(o.created_at).toLocaleString('es-MX')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
