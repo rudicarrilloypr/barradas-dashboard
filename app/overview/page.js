@@ -4,6 +4,7 @@ import OverviewSalesChart from '../../app/components/charts/OverviewSalesChart';
 import CatalogGrowthChart from '../../app/components/charts/CatalogGrowthChart';
 import LeadsGrowthChart from '../../app/components/charts/LeadsGrowthChart';
 import OverviewPdfButton from '../../app/components/OverviewPdfButton';
+import RangeSelect from '../../app/components/RangeSelect';
 
 function Card({ title, value }) {
   return (
@@ -24,6 +25,65 @@ function formatCurrency(amount) {
     style: 'currency',
     currency: 'MXN',
   }).format(parseFloat(amount));
+}
+
+// 🔹 AQUÍ va getRangeLabel, a nivel de módulo
+function getRangeLabel(value) {
+  switch (value) {
+    case '90d':
+      return 'Últimos 90 días';
+    case 'ytd':
+      return 'Año en curso';
+    case 'all':
+      return 'Todo el historial';
+    case '30d':
+    default:
+      return 'Últimos 30 días';
+  }
+}
+
+function getRangeDates(range) {
+  const now = new Date();
+  let from = null;
+
+  switch (range) {
+    case '90d': {
+      const d = new Date(now);
+      d.setDate(d.getDate() - 90);
+      from = d;
+      break;
+    }
+    case 'ytd': {
+      const d = new Date(now.getFullYear(), 0, 1);
+      from = d;
+      break;
+    }
+    case 'all':
+      from = null; // sin límite inferior
+      break;
+    case '30d':
+    default: {
+      const d = new Date(now);
+      d.setDate(d.getDate() - 30);
+      from = d;
+      break;
+    }
+  }
+
+  return { from, to: now };
+}
+
+function filterByDate(items, range, field = 'created_at') {
+  const { from, to } = getRangeDates(range);
+  if (!from) return items;
+
+  return items.filter((item) => {
+    const raw = item[field];
+    if (!raw) return false;
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return false;
+    return d >= from && d <= to;
+  });
 }
 
 // Ventas por día
@@ -88,7 +148,10 @@ function buildLeadsGrowth(customers) {
   });
 }
 
-export default async function OverviewPage() {
+export default async function OverviewPage({ searchParams }) {
+  const range = searchParams?.range || '30d';
+  const rangeLabel = getRangeLabel(range);
+
   let products = [];
   let orders = [];
   let customers = [];
@@ -101,20 +164,25 @@ export default async function OverviewPage() {
     console.error(error);
   }
 
-  const totalProducts = products.length;
-  const totalOrders = orders.length;
-  const totalLeads = customers.length;
+  // Filtrar por rango
+  const filteredOrders = filterByDate(orders, range, 'created_at');
+  const filteredCustomers = filterByDate(customers, range, 'created_at');
+  const filteredProducts = filterByDate(products, range, 'created_at');
 
-  const totalSales = orders.reduce((sum, order) => {
+  const totalProducts = filteredProducts.length;
+  const totalOrders = filteredOrders.length;
+  const totalLeads = filteredCustomers.length;
+
+  const totalSales = filteredOrders.reduce((sum, order) => {
     const n = parseFloat(order.total_price || 0);
     return sum + (isNaN(n) ? 0 : n);
   }, 0);
 
-  const salesByDay = buildSalesByDay(orders);
-  const catalogGrowth = buildCatalogGrowth(products);
-  const leadsGrowth = buildLeadsGrowth(customers);
+  const salesByDay = buildSalesByDay(filteredOrders);
+  const catalogGrowth = buildCatalogGrowth(filteredProducts);
+  const leadsGrowth = buildLeadsGrowth(filteredCustomers);
 
-  // 🔹 Datos para el PDF
+  // Datos para el PDF
   const generatedAt = new Date().toLocaleString('es-MX');
 
   const report = {
@@ -126,6 +194,7 @@ export default async function OverviewPage() {
     salesByDay,
     catalogGrowth,
     leadsGrowth,
+    rangeLabel,
   };
 
   return (
@@ -133,12 +202,15 @@ export default async function OverviewPage() {
       <h1 className="text-2xl font-semibold text-slate-50 mb-2">
         Overview
       </h1>
-      <p className="text-sm text-slate-400 mb-3 max-w-xl">
+      <p className="text-sm text-slate-400 mb-2 max-w-xl">
         Resumen general de productos, ventas y leads conectado en tiempo real con Shopify.
       </p>
 
-      {/* Botón para generar PDF */}
-      <OverviewPdfButton report={report} />
+      {/* Select de rango + botón PDF */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+        <RangeSelect />
+        <OverviewPdfButton report={report} />
+      </div>
 
       {/* KPIs principales */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
@@ -167,7 +239,7 @@ export default async function OverviewPage() {
               Tendencia de ventas (resumen)
             </h2>
             <span className="text-xs text-slate-500">
-              Ventas agregadas por día
+              Ventas agregadas por día ({rangeLabel.toLowerCase()})
             </span>
           </div>
           <OverviewSalesChart data={salesByDay} />
@@ -179,7 +251,7 @@ export default async function OverviewPage() {
               Crecimiento del catálogo
             </h2>
             <span className="text-xs text-slate-500">
-              Productos acumulados en el tiempo
+              Productos acumulados en el tiempo ({rangeLabel.toLowerCase()})
             </span>
           </div>
           <CatalogGrowthChart data={catalogGrowth} />
@@ -192,7 +264,7 @@ export default async function OverviewPage() {
             Crecimiento de leads
           </h2>
           <span className="text-xs text-slate-500">
-            Clientes/leads acumulados en el tiempo
+            Clientes/leads acumulados en el tiempo ({rangeLabel.toLowerCase()})
           </span>
         </div>
         <LeadsGrowthChart data={leadsGrowth} />

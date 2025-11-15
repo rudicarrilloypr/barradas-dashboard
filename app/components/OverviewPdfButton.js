@@ -23,6 +23,7 @@ export default function OverviewPdfButton({ report }) {
       salesByDay,
       catalogGrowth,
       leadsGrowth,
+      rangeLabel,
     } = report;
 
     const doc = new jsPDF("p", "mm", "a4");
@@ -38,6 +39,8 @@ export default function OverviewPdfButton({ report }) {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text(`Fecha de generación: ${generatedAt}`, 14, y);
+    y += 5;
+    doc.text(`Rango analizado: ${rangeLabel}`, 14, y);
     y += 8;
 
     // KPIs
@@ -76,7 +79,7 @@ export default function OverviewPdfButton({ report }) {
       head: [["Fecha", "Ventas"]],
       body: salesRows,
       styles: { fontSize: 9 },
-      headStyles: { fillColor: [15, 23, 42] }, // slate-900
+      headStyles: { fillColor: [15, 23, 42] },
     });
 
     let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : y + 10;
