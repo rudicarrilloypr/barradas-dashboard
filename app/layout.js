@@ -2,8 +2,12 @@ import './globals.css';
 import Layout from './components/Layout';
 
 export const metadata = {
-  title: 'Barradas Dashboard',
+  title: 'Barradas Nexus',
   description: 'Panel de gestión comercial y marketing digital de Barradas',
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({ children }) {

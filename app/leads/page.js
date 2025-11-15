@@ -25,7 +25,7 @@ export default async function LeadsPage() {
       <div className="mb-4 bg-slate-900/70 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
         <div>
           <div className="text-xs uppercase tracking-wide text-slate-400">
-            Total de leads
+            Total leads
           </div>
           <div className="text-xl font-semibold text-slate-50">
             {customers.length}
