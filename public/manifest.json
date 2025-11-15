@@ -1,0 +1,21 @@
+{
+  "name": "Barradas Nexus",
+  "short_name": "Nexus",
+  "description": "Control comercial y digital de Barradas en un solo lugar.",
+  "start_url": "/overview",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32 48x48 64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
