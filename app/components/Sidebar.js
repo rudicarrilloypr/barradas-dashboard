@@ -10,6 +10,7 @@ const menuItems = [
   { href: "/sales", label: "Sales" },
   { href: "/products", label: "Products" },
   { href: "/leads", label: "Leads" },
+  { href: "/insights", label: "Insights" },
   { href: "/settings", label: "Settings" },
 ];
 
@@ -33,7 +34,7 @@ export default function Sidebar() {
               Barradas Nexus
             </span>
             <span className="text-[10px] text-slate-500">
-              Control comercial
+              Control comercial digital
             </span>
           </div>
         </div>
