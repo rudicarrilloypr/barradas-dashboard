@@ -1,10 +1,11 @@
 // src/lib/shopify.js
 
-const SHOP_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
+export const SHOP_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 
 // Versión de API
 const API_VERSION = '2024-01';
+export const SHOPIFY_API_VERSION = API_VERSION;
 
 async function shopifyRequest(path) {
   const url = `https://${SHOP_DOMAIN}/admin/api/${API_VERSION}/${path}`;
@@ -48,4 +49,9 @@ export async function getOrders() {
 export async function getCustomers() {
   const data = await shopifyRequest('customers.json?limit=50');
   return data.customers || [];
+}
+
+export async function getShopInfo() {
+  const data = await shopifyRequest('shop.json');
+  return data.shop;
 }
