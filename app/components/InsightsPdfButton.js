@@ -143,7 +143,7 @@ export default function InsightsPdfButton({ report }) {
       onClick={handleGeneratePdf}
       className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-slate-50 border border-blue-500 shadow-sm shadow-blue-900/40 transition-colors mb-4"
     >
-      Descargar reporte PDF
+      Descargar Reporte en PDF
       <span className="text-[10px] opacity-80">Insights</span>
     </button>
   );

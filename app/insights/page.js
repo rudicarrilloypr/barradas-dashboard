@@ -133,7 +133,7 @@ export default async function InsightsPage() {
     bestMonthText = `Mes más fuerte: ${best.month} con ${formatCurrency(best.total)} en ventas.`;
   }
 
-  // 🔹 Aquí definimos los datos del reporte PDF (ANTES del return)
+  // Aquí definimos los datos del reporte PDF (ANTES del return)
   const generatedAt = new Date().toLocaleString("es-MX");
 
   const report = {
