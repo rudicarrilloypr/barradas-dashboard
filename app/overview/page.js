@@ -3,6 +3,7 @@ import { getProducts, getOrders, getCustomers } from '../../src/lib/shopify';
 import OverviewSalesChart from '../../app/components/charts/OverviewSalesChart';
 import CatalogGrowthChart from '../../app/components/charts/CatalogGrowthChart';
 import LeadsGrowthChart from '../../app/components/charts/LeadsGrowthChart';
+import OverviewPdfButton from '../../app/components/OverviewPdfButton';
 
 function Card({ title, value }) {
   return (
@@ -65,7 +66,7 @@ function buildCatalogGrowth(products) {
   });
 }
 
-// Crecimiento acumulado de leads/clientes
+// Crecimiento acumulado de leads
 function buildLeadsGrowth(customers) {
   const perDay = new Map();
 
@@ -113,14 +114,31 @@ export default async function OverviewPage() {
   const catalogGrowth = buildCatalogGrowth(products);
   const leadsGrowth = buildLeadsGrowth(customers);
 
+  // 🔹 Datos para el PDF
+  const generatedAt = new Date().toLocaleString('es-MX');
+
+  const report = {
+    generatedAt,
+    totalProducts,
+    totalOrders,
+    totalLeads,
+    totalSales,
+    salesByDay,
+    catalogGrowth,
+    leadsGrowth,
+  };
+
   return (
     <div>
       <h1 className="text-2xl font-semibold text-slate-50 mb-2">
         Overview
       </h1>
-      <p className="text-sm text-slate-400 mb-6 max-w-xl">
+      <p className="text-sm text-slate-400 mb-3 max-w-xl">
         Resumen general de productos, ventas y leads conectado en tiempo real con Shopify.
       </p>
+
+      {/* Botón para generar PDF */}
+      <OverviewPdfButton report={report} />
 
       {/* KPIs principales */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
