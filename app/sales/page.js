@@ -1,5 +1,6 @@
 // src/app/sales/page.js
 import { getOrders } from '../../src/lib/shopify';
+import SalesChart from '../../app/components/charts/SalesChart';
 
 function formatCurrency(amount) {
   if (!amount) return '$0';
@@ -7,6 +8,27 @@ function formatCurrency(amount) {
     style: 'currency',
     currency: 'MXN',
   }).format(parseFloat(amount));
+}
+
+function buildSalesByDay(orders) {
+  // Agrupar por fecha (YYYY-MM-DD)
+  const map = new Map();
+
+  for (const order of orders) {
+    if (!order.created_at) continue;
+    const dateObj = new Date(order.created_at);
+    const day = dateObj.toISOString().slice(0, 10); // "YYYY-MM-DD"
+    const total = parseFloat(order.total_price || 0);
+    const prev = map.get(day) || 0;
+    map.set(day, prev + (isNaN(total) ? 0 : total));
+  }
+
+  // Convertir a array ordenado por fecha
+  const result = Array.from(map.entries())
+    .map(([date, total]) => ({ date, total: Number(total.toFixed(2)) }))
+    .sort((a, b) => (a.date > b.date ? 1 : -1));
+
+  return result;
 }
 
 export default async function SalesPage() {
@@ -18,11 +40,12 @@ export default async function SalesPage() {
     console.error(error);
   }
 
-  // Calcular total de ventas de estas órdenes
   const totalSales = orders.reduce((sum, order) => {
     const n = parseFloat(order.total_price || 0);
     return sum + (isNaN(n) ? 0 : n);
   }, 0);
+
+  const salesByDay = buildSalesByDay(orders);
 
   return (
     <div>
@@ -30,10 +53,11 @@ export default async function SalesPage() {
         Sales
       </h1>
       <p className="text-sm text-slate-400 mb-4">
-        Órdenes recientes obtenidas desde Shopify.
+        Órdenes recientes obtenidas desde Shopify, con resumen de ventas por día.
       </p>
 
-      <div className="mb-4 bg-slate-900/70 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+      {/* Resumen */}
+      <div className="mb-6 bg-slate-900/70 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <div className="text-xs uppercase tracking-wide text-slate-400">
             Ventas totales (muestra actual)
@@ -43,10 +67,25 @@ export default async function SalesPage() {
           </div>
         </div>
         <div className="text-sm text-slate-400">
-          Órdenes listadas: <span className="text-slate-100">{orders.length}</span>
+          Órdenes listadas:{' '}
+          <span className="text-slate-100 font-medium">{orders.length}</span>
         </div>
       </div>
 
+      {/* Gráfica */}
+      <div className="mb-8 bg-slate-900/70 border border-slate-800 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-slate-100">
+            Ventas por día
+          </h2>
+          <span className="text-xs text-slate-500">
+            Datos agregados por fecha de orden
+          </span>
+        </div>
+        <SalesChart data={salesByDay} />
+      </div>
+
+      {/* Tabla (si ya la tenías, déjala, solo la pegamos debajo) */}
       {orders.length === 0 ? (
         <div className="text-sm text-slate-500">
           No se encontraron órdenes.  
@@ -69,7 +108,10 @@ export default async function SalesPage() {
                 <tr key={o.id} className="border-b border-slate-900/60">
                   <td className="px-4 py-2 text-slate-200">{o.name}</td>
                   <td className="px-4 py-2 text-slate-300">
-                    {o.customer ? `${o.customer.first_name || ''} ${o.customer.last_name || ''}`.trim() || '—' : '—'}
+                    {o.customer
+                      ? `${o.customer.first_name || ''} ${o.customer.last_name || ''}`.trim() ||
+                        '—'
+                      : '—'}
                   </td>
                   <td className="px-4 py-2 text-slate-200">
                     {formatCurrency(o.total_price)}

@@ -1,4 +1,5 @@
 import { getProducts, getOrders } from '../../src/lib/shopify';
+import OverviewSalesChart from '../../app/components/charts/OverviewSalesChart';
 
 function Card({ title, value }) {
   return (
@@ -21,6 +22,23 @@ function formatCurrency(amount) {
   }).format(parseFloat(amount));
 }
 
+function buildSalesByDay(orders) {
+  const map = new Map();
+
+  for (const order of orders) {
+    if (!order.created_at) continue;
+    const dateObj = new Date(order.created_at);
+    const day = dateObj.toISOString().slice(0, 10);
+    const total = parseFloat(order.total_price || 0);
+    const prev = map.get(day) || 0;
+    map.set(day, prev + (isNaN(total) ? 0 : total));
+  }
+
+  return Array.from(map.entries())
+    .map(([date, total]) => ({ date, total: Number(total.toFixed(2)) }))
+    .sort((a, b) => (a.date > b.date ? 1 : -1));
+}
+
 export default async function OverviewPage() {
   let products = [];
   let orders = [];
@@ -34,11 +52,12 @@ export default async function OverviewPage() {
 
   const totalProducts = products.length;
   const totalOrders = orders.length;
-
   const totalSales = orders.reduce((sum, order) => {
     const n = parseFloat(order.total_price || 0);
     return sum + (isNaN(n) ? 0 : n);
   }, 0);
+
+  const salesByDay = buildSalesByDay(orders);
 
   return (
     <div>
@@ -53,12 +72,23 @@ export default async function OverviewPage() {
         <Card title="Productos activos" value={totalProducts} />
         <Card title="Órdenes totales (muestra)" value={totalOrders} />
         <Card title="Ventas totales (muestra)" value={formatCurrency(totalSales)} />
-        <Card title="Estado" value={totalOrders > 0 ? 'Tienda en marcha' : 'En preparación'} />
+        <Card
+          title="Estado"
+          value={totalOrders > 0 ? 'Tienda en marcha' : 'En preparación'}
+        />
       </div>
 
-      <p className="text-xs text-slate-500">
-        * Los datos se actualizan en tiempo real desde la API de Shopify.
-      </p>
+      <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-slate-100">
+            Tendencia de ventas (resumen)
+          </h2>
+          <span className="text-xs text-slate-500">
+            Vista rápida de las ventas por día
+          </span>
+        </div>
+        <OverviewSalesChart data={salesByDay} />
+      </div>
     </div>
   );
 }
