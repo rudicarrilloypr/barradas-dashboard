@@ -25,7 +25,7 @@ function formatCurrency(amount) {
   }).format(parseFloat(amount));
 }
 
-// Ventas por día (mismo helper que ya tenías)
+// Ventas por día
 function buildSalesByDay(orders) {
   const map = new Map();
 
