@@ -1,6 +1,7 @@
 // src/app/insights/page.js
 import { getOrders, getProducts, getCustomers } from '../../src/lib/shopify';
 import InsightsPdfButton from '../../app/components/InsightsPdfButton';
+import RangeSelect from '../../app/components/RangeSelect';
 
 function formatCurrency(amount) {
   if (!amount) return '$0';
@@ -8,6 +9,65 @@ function formatCurrency(amount) {
     style: 'currency',
     currency: 'MXN',
   }).format(parseFloat(amount));
+}
+
+// 🔹 mismo helper que en overview
+function getRangeLabel(value) {
+  switch (value) {
+    case '90d':
+      return 'Últimos 90 días';
+    case 'ytd':
+      return 'Año en curso';
+    case 'all':
+      return 'Todo el historial';
+    case '30d':
+    default:
+      return 'Últimos 30 días';
+  }
+}
+
+function getRangeDates(range) {
+  const now = new Date();
+  let from = null;
+
+  switch (range) {
+    case '90d': {
+      const d = new Date(now);
+      d.setDate(d.getDate() - 90);
+      from = d;
+      break;
+    }
+    case 'ytd': {
+      const d = new Date(now.getFullYear(), 0, 1);
+      from = d;
+      break;
+    }
+    case 'all':
+      from = null;
+      break;
+    case '30d':
+    default: {
+      const d = new Date(now);
+      d.setDate(d.getDate() - 30);
+      from = d;
+      break;
+    }
+  }
+
+  return { from, to: now };
+}
+
+function filterByDate(items, range, field = 'created_at') {
+  const { from, to } = getRangeDates(range);
+  if (!from) return items;
+
+  return items.filter((item) => {
+    const raw = item[field];
+    if (!raw) return false;
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return false;
+    return d >= from && d <= to;
+  });
 }
 
 // Top productos por ventas (importe total)
@@ -89,7 +149,12 @@ function InsightCard({ title, value, description }) {
   );
 }
 
-export default async function InsightsPage() {
+export default async function InsightsPage({ searchParams }) {
+  // 👇 igual que en overview: searchParams puede ser Promise
+  const sp = await searchParams;
+  const range = (sp?.get ? sp.get('range') : sp?.range) || '30d';
+  const rangeLabel = getRangeLabel(range);
+
   let orders = [];
   let products = [];
   let customers = [];
@@ -102,18 +167,23 @@ export default async function InsightsPage() {
     console.error(error);
   }
 
-  const totalOrders = orders.length;
-  const totalSales = orders.reduce((sum, order) => {
+  // Aplicar rango
+  const filteredOrders = filterByDate(orders, range, 'created_at');
+  const filteredCustomers = filterByDate(customers, range, 'created_at');
+  const filteredProducts = filterByDate(products, range, 'created_at');
+
+  const totalOrders = filteredOrders.length;
+  const totalSales = filteredOrders.reduce((sum, order) => {
     const n = parseFloat(order.total_price || 0);
     return sum + (isNaN(n) ? 0 : n);
   }, 0);
 
-  const totalLeads = customers.length;
-  const totalProducts = products.length;
+  const totalLeads = filteredCustomers.length;
+  const totalProducts = filteredProducts.length;
 
-  const topProducts = buildTopProductsByRevenue(orders);
-  const salesByMonth = buildSalesByMonth(orders);
-  const leadsByMonth = buildLeadsByMonth(customers);
+  const topProducts = buildTopProductsByRevenue(filteredOrders);
+  const salesByMonth = buildSalesByMonth(filteredOrders);
+  const leadsByMonth = buildLeadsByMonth(filteredCustomers);
 
   // Crecimiento promedio de leads (muy simple: último mes vs penúltimo)
   let leadsTrendText = 'Sin datos suficientes aún.';
@@ -147,6 +217,7 @@ export default async function InsightsPage() {
     topProducts,
     salesByMonth,
     leadsByMonth,
+    rangeLabel,
   };
 
   return (
@@ -154,29 +225,32 @@ export default async function InsightsPage() {
       <h1 className="text-2xl font-semibold text-slate-50 mb-2">
         Insights
       </h1>
-      <p className="text-sm text-slate-400 mb-3 max-w-xl">
+      <p className="text-sm text-slate-400 mb-2 max-w-xl">
         Módulo de inteligencia básica sobre productos, ventas y leads para apoyar decisiones comerciales.
       </p>
 
-      {/* Botón para generar PDF */}
-      <InsightsPdfButton report={report} />
+      {/* Select de rango + botón PDF */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+        <RangeSelect />
+        <InsightsPdfButton report={report} />
+      </div>
 
       {/* KPIs generales */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <InsightCard
           title="Ventas totales (muestra)"
           value={formatCurrency(totalSales)}
-          description={`Órdenes analizadas: ${totalOrders}`}
+          description={`Órdenes analizadas: ${totalOrders} · ${rangeLabel}`}
         />
         <InsightCard
           title="Productos en catálogo"
           value={totalProducts}
-          description="Productos actuales obtenidos desde Shopify"
+          description={`Productos considerados en el rango (${rangeLabel.toLowerCase()})`}
         />
         <InsightCard
           title="Leads totales"
           value={totalLeads}
-          description="Clientes o contactos registrados"
+          description={`Clientes o contactos registrados en el rango`}
         />
         <InsightCard
           title="Mes más fuerte en ventas"
@@ -192,7 +266,7 @@ export default async function InsightsPage() {
             Top productos por ingresos
           </h2>
           <span className="text-xs text-slate-500">
-            Basado en el importe total vendido
+            Basado en el importe total vendido ({rangeLabel.toLowerCase()})
           </span>
         </div>
 

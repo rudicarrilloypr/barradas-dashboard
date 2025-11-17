@@ -25,6 +25,7 @@ export default function InsightsPdfButton({ report }) {
       topProducts,
       salesByMonth,
       leadsByMonth,
+      rangeLabel,
     } = report;
 
     const doc = new jsPDF("p", "mm", "a4");
@@ -40,6 +41,8 @@ export default function InsightsPdfButton({ report }) {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text(`Fecha de generación: ${generatedAt}`, 14, y);
+    y += 5;
+    doc.text(`Rango analizado: ${rangeLabel}`, 14, y);
     y += 8;
 
     // Resumen
@@ -89,7 +92,7 @@ export default function InsightsPdfButton({ report }) {
       head: [["Producto", "Cantidad", "Ingresos"]],
       body: topRows,
       styles: { fontSize: 9 },
-      headStyles: { fillColor: [15, 23, 42] }, // slate-900
+      headStyles: { fillColor: [15, 23, 42] },
     });
 
     let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : y + 10;
@@ -132,9 +135,8 @@ export default function InsightsPdfButton({ report }) {
       headStyles: { fillColor: [15, 23, 42] },
     });
 
-    // Guardar archivo
     const now = new Date();
-    const stamp = now.toISOString().slice(0, 10); // YYYY-MM-DD
+    const stamp = now.toISOString().slice(0, 10);
     doc.save(`barradas-nexus-insights-${stamp}.pdf`);
   };
 
