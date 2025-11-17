@@ -149,7 +149,11 @@ function buildLeadsGrowth(customers) {
 }
 
 export default async function OverviewPage({ searchParams }) {
-  const range = searchParams?.range || '30d';
+  // 👇 desempaquetar el Promise
+  const sp = await searchParams;
+
+  // si viene como URLSearchParams:
+  const range = (sp?.get ? sp.get('range') : sp?.range) || '30d';
   const rangeLabel = getRangeLabel(range);
 
   let products = [];
