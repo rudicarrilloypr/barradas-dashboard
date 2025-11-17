@@ -3,7 +3,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import LogoMark from "./LogoMark";
+import Image from "next/image";
+// import LogoMark from "./LogoMark"; // ya no lo usamos aquí
 
 const menuItems = [
   { href: "/overview", label: "Overview" },
@@ -28,13 +29,23 @@ export default function Sidebar() {
       {/* Logo + nombre */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <LogoMark size={22} />
+          {/* Icono de la app (solo aquí en el sidebar) */}
+          <div className="shrink-0">
+            <Image
+              src="/icon.png" // ⬅️ cambia a la ruta/nombre real de tu icono
+              alt="Barradas Nexus Icon"
+              width={28}
+              height={28}
+              className="rounded-md"
+            />
+          </div>
+
           <div className="flex flex-col leading-tight">
             <span className="font-semibold tracking-wide text-xs md:text-sm">
               Barradas Nexus
             </span>
             <span className="text-[10px] text-slate-500">
-              Control comercial digital
+              Control comercial digital de barradas.mx
             </span>
           </div>
         </div>
