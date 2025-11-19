@@ -6,33 +6,33 @@
 📘 Table of Contents
 <div align="left">
 
-- [📖 About the Project](#-about-project)
-- [🛠 Built with](#-built-with)
-  - [Tech Stack](#-tech-stack)
-  - [Key Features](#-key-features)
-- [🚀 Getting Started](#-getting-started)
-  - [Prerequisites](#-prerequisites)
-  - [Setup](#-setup)
-  - [Environment Variables](#-environment-variables)
-  - [Install](#-install)
-  - [Run](#️-run)
-- [📊 Modules Overview](#-modules-overview)
-- [👥 Author](#-author)
-- [🙏 Acknowledgements](#-acknowledgements)
-- [🔮 Future Features](#-future-features)
-- [🤝 Contributing](#-contributing)
-- [⭐ Show Your Support](#-show-your-support)
-- [📝 License](#-license)
+- [📖 About the Project](#📖-barradas-nexus)
+- [🛠 Built with](#🛠-built-with)
+  - [Tech Stack](#tech-stack)
+  - [Key Features](#✨-key-features)
+- [🚀 Getting Started](#🚀-getting-started)
+  - [Prerequisites](#📌-prerequisites)
+  - [Setup](#🧩-setup)
+  - [Environment Variables](#🔐-environment-variables)
+  - [Install](#📦-install)
+  - [Run](#▶️-run)
+- [📊 Modules Overview](#📊-modules-overview)
+- [👥 Author](#👥-author)
+- [🙏 Acknowledgements](#🙏-acknowledgements)
+- [🔮 Future Features](#🔮-future-features)
+- [🤝 Contributing](#🤝-contributing)
+- [⭐ Show Your Support](#⭐-show-your-support)
+- [📝 License](#📝-license)
 
 
-## 📖 Barradas Nexus <a name="about-project"></a>
+## 📖 Barradas Nexus
 
 Barradas Nexus is an internal, production-ready commercial dashboard designed for Barradas.mx.
 It integrates directly with Shopify Admin API, providing real-time analytics, catalog insights, sales tracking, lead management, and auto-generated PDF business reports—all within an elegant and responsive interface.
 
 This app replaces the need for manual reports and fragmented data by centralizing KPIs, trends, growth indicators, and operational information in a single unified tool.
 
-## 🛠 Built With <a name="built-with"></a>
+## 🛠 Built With
 
 Next.js 14 (App Router + Server Components)
 
