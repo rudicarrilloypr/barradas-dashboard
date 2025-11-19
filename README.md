@@ -25,14 +25,14 @@
 - [📝 License](#📝-license)
 
 
-## 📖 Barradas Nexus <a name="barradas-nexus"></a>
+## 📖 Barradas Nexus<a name="barradas-nexus"></a>
 
 Barradas Nexus is an internal, production-ready commercial dashboard designed for Barradas.mx.
 It integrates directly with Shopify Admin API, providing real-time analytics, catalog insights, sales tracking, lead management, and auto-generated PDF business reports—all within an elegant and responsive interface.
 
 This app replaces the need for manual reports and fragmented data by centralizing KPIs, trends, growth indicators, and operational information in a single unified tool.
 
-## 🛠 Built With <a name="built-with"></a>
+## 🛠 Built With<a name="built-with"></a>
 
 - Next.js 14 (App Router + Server Components)
 - TailwindCSS
