@@ -10,7 +10,7 @@ export default function Topbar() {
       </div>
       <div className="text-xs sm:text-sm text-slate-400">
         Usuario:{" "}
-        <span className="text-slate-100 font-medium">Rodolfo Carrillo</span>
+        <span className="text-slate-100 font-medium">Web Master Barradas</span>
       </div>
     </header>
   );
