@@ -6,33 +6,33 @@
 📘 Table of Contents
 <div align="left">
 
-- [📖 About the Project](#📖-barradas-nexus)
-- [🛠 Built with](#🛠-built-with)
+- [📖 About the Project](#barradas-nexus)
+- [🛠 Built with](#built-with)
   - [Tech Stack](#tech-stack)
-  - [Key Features](#✨-key-features)
-- [🚀 Getting Started](#🚀-getting-started)
-  - [Prerequisites](#📌-prerequisites)
-  - [Setup](#🧩-setup)
-  - [Environment Variables](#🔐-environment-variables)
-  - [Install](#📦-install)
-  - [Run](#▶️-run)
-- [📊 Modules Overview](#📊-modules-overview)
-- [👥 Author](#👥-author)
-- [🙏 Acknowledgements](#🙏-acknowledgements)
-- [🔮 Future Features](#🔮-future-features)
-- [🤝 Contributing](#🤝-contributing)
-- [⭐ Show Your Support](#⭐-show-your-support)
-- [📝 License](#📝-license)
+  - [Key Features](#key-features)
+- [🚀 Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
+  - [Environment Variables](#environment-variables)
+  - [Install](#install)
+  - [Run](#run)
+- [📊 Modules Overview](#modules-overview)
+- [👥 Author](#author)
+- [🙏 Acknowledgements](#acknowledgements)
+- [🔮 Future Features](#future-features)
+- [🤝 Contributing](#contributing)
+- [⭐ Show Your Support](#show-your-support)
+- [📝 License](#license)
 
 
-## 📖 Barradas Nexus<a name="barradas-nexus"></a>
+## Barradas Nexus<a name="barradas-nexus"></a>
 
 Barradas Nexus is an internal, production-ready commercial dashboard designed for Barradas.mx.
 It integrates directly with Shopify Admin API, providing real-time analytics, catalog insights, sales tracking, lead management, and auto-generated PDF business reports—all within an elegant and responsive interface.
 
 This app replaces the need for manual reports and fragmented data by centralizing KPIs, trends, growth indicators, and operational information in a single unified tool.
 
-## 🛠 Built With<a name="built-with"></a>
+## Built With<a name="built-with"></a>
 
 - Next.js 14 (App Router + Server Components)
 - TailwindCSS
@@ -44,7 +44,7 @@ This app replaces the need for manual reports and fragmented data by centralizin
 # Tech Stack <a name="tech-stack"></a>
 <details> <summary>Client</summary> <ul> <li>Next.js App Router</li> <li>TailwindCSS</li> <li>Recharts</li> </ul> </details> <details> <summary>Server</summary> <ul> <li>Next.js Server Components</li> <li>Shopify Admin API</li> </ul> </details> <details> <summary>Utilities</summary> <ul> <li>jsPDF</li> <li>jspdf-autotable</li> </ul> </details>
 
-## ✨ Key Features <a name="key-features"></a>
+## Key Features <a name="key-features"></a>
 📊 Overview Dashboard
 
 - KPIs: ventas, productos, leads, órdenes.
@@ -101,8 +101,8 @@ This app replaces the need for manual reports and fragmented data by centralizin
 
 - Future system config.
 
-# 🚀 Getting Started <a name="getting-started"></a>
-## 📌 Prerequisites <a name="prerequisites"></a>
+#  Getting Started <a name="getting-started"></a>
+##  Prerequisites <a name="prerequisites"></a>
 
  Asegúrate de tener instalado:
 
@@ -118,7 +118,7 @@ Una tienda de Shopify y un Admin API Token con permisos:
 
     read_orders
 
-## 🧩 Setup <a name="setup"></a>
+## Setup <a name="setup"></a>
 
 Clona el repositorio:
 
@@ -129,7 +129,7 @@ Entra al proyecto:
 
     cd barradas-nexus
 
-## 🔐 Environment Variables <a name="env"></a>
+## Environment Variables <a name="env"></a>
 
 Crea un archivo:
 
@@ -141,10 +141,10 @@ Agrega:
     SHOPIFY_SHOP_DOMAIN=your-shop.myshopify.com
     SHOPIFY_ADMIN_ACCESS_TOKEN=your_admin_api_token
 
-# 📦 Install <a name="install"></a>
+# Install <a name="install"></a>
     npm install
 
-## ▶️ Run <a name="run"></a>
+## Run <a name="run"></a>
 
 Modo desarrollo:
 
@@ -155,7 +155,7 @@ Luego visita:
 
     http://localhost:3000
 
-# 📊 Modules Overview <a name="modules"></a>
+#  Modules Overview <a name="modules"></a>
 * Módulo 
   - Descripción
 * Overview	
@@ -170,7 +170,7 @@ Luego visita:
   - Inteligencia comercial + PDF avanzado
 * Settings
   - Información del usuario y estado del sistema
-# 👥 Author <a name="authors"></a>
+# Author <a name="authors"></a>
 
 👤 Rodolfo Carrillo
 
@@ -180,12 +180,12 @@ Twitter: @__rudicarrillo
 
 LinkedIn: Rudi Carrillo
 
-# 🙏 Acknowledgements <a name="acknowledgements"></a>
+# Acknowledgements <a name="acknowledgements"></a>
 
 A todo el equipo de Barradas por confiar en el desarrollo del nuevo ecosistema digital.
 Y a todos quienes aportaron ideas para la evolución del dashboard.
 
-# 🔮 Future Features <a name="future-features"></a>
+# Future Features <a name="future-features"></a>
 
 - Multi-sucursal & multi-inventario.
 
@@ -199,16 +199,16 @@ Y a todos quienes aportaron ideas para la evolución del dashboard.
 
 - Dark/Light theme switch.
 
-# 🤝 Contributing <a name="contributing"></a>
+# Contributing <a name="contributing"></a>
 
 Contribuciones son bienvenidas.
 Haz un fork, crea un branch, envía un pull request.
 
-# ⭐ Show Your Support <a name="support"></a>
+# Show Your Support <a name="support"></a>
 
 Si este proyecto te es útil, dale una ⭐ en GitHub o compártelo con tu equipo.
 
-# 📝 License <a name="license"></a>
+# License <a name="license"></a>
 
 Este proyecto está bajo la licencia MIT.
 </div>
