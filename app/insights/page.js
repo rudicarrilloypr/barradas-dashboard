@@ -71,6 +71,10 @@ function filterByDate(items, range, field = 'created_at') {
 }
 
 // Top productos por ventas (importe total)
+function filterActiveProducts(products) {
+  return products.filter((product) => product.status === 'active');
+}
+
 function buildTopProductsByRevenue(orders, limit = 5) {
   const map = new Map(); // key: product_id, value: { title, revenue, quantity }
 
@@ -170,7 +174,11 @@ export default async function InsightsPage({ searchParams }) {
   // Aplicar rango
   const filteredOrders = filterByDate(orders, range, 'created_at');
   const filteredCustomers = filterByDate(customers, range, 'created_at');
-  const filteredProducts = filterByDate(products, range, 'created_at');
+  const filteredProducts = filterByDate(
+    filterActiveProducts(products),
+    range,
+    'created_at'
+  );
 
   const totalOrders = filteredOrders.length;
   const totalSales = filteredOrders.reduce((sum, order) => {

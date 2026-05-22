@@ -5,6 +5,8 @@ import Pagination from '../../app/components/Pagination';
 const PAGE_SIZE = 10; // cuántos productos por página
 
 export default async function ProductsPage({ searchParams }) {
+  const sp = await searchParams;
+  const pageParam = (sp?.get ? sp.get('page') : sp?.page) || '1';
   let products = [];
 
   try {
@@ -14,7 +16,7 @@ export default async function ProductsPage({ searchParams }) {
   }
 
   const total = products.length;
-  const page = parseInt(searchParams?.page || "1", 10);
+  const page = parseInt(pageParam, 10);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const safePage = Math.min(Math.max(page, 1), totalPages);

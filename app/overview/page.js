@@ -6,7 +6,7 @@ import LeadsGrowthChart from '../../app/components/charts/LeadsGrowthChart';
 import OverviewPdfButton from '../../app/components/OverviewPdfButton';
 import RangeSelect from '../../app/components/RangeSelect';
 
-function Card({ title, value }) {
+function Card({ title, value, detail }) {
   return (
     <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
       <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">
@@ -15,6 +15,11 @@ function Card({ title, value }) {
       <div className="text-xl font-semibold text-slate-50">
         {value}
       </div>
+      {detail && (
+        <div className="text-xs text-slate-500 mt-2">
+          {detail}
+        </div>
+      )}
     </div>
   );
 }
@@ -87,6 +92,22 @@ function filterByDate(items, range, field = 'created_at') {
 }
 
 // Ventas por día
+function filterActiveProducts(products) {
+  return products.filter((product) => product.status === 'active');
+}
+
+function getPaidOrders(orders) {
+  return orders.filter((order) =>
+    ['paid', 'partially_paid'].includes(order.financial_status)
+  );
+}
+
+function getPendingOrders(orders) {
+  return orders.filter((order) =>
+    ['pending', 'authorized', 'partially_paid'].includes(order.financial_status)
+  );
+}
+
 function buildSalesByDay(orders) {
   const map = new Map();
 
@@ -171,9 +192,17 @@ export default async function OverviewPage({ searchParams }) {
   // Filtrar por rango
   const filteredOrders = filterByDate(orders, range, 'created_at');
   const filteredCustomers = filterByDate(customers, range, 'created_at');
-  const filteredProducts = filterByDate(products, range, 'created_at');
+  const filteredProducts = filterByDate(
+    filterActiveProducts(products),
+    range,
+    'created_at'
+  );
 
+  const activeProducts = filterActiveProducts(products);
+  const paidOrders = getPaidOrders(filteredOrders);
+  const pendingOrders = getPendingOrders(filteredOrders);
   const totalProducts = filteredProducts.length;
+  const activeProductsTotal = activeProducts.length;
   const totalOrders = filteredOrders.length;
   const totalLeads = filteredCustomers.length;
 
@@ -181,6 +210,11 @@ export default async function OverviewPage({ searchParams }) {
     const n = parseFloat(order.total_price || 0);
     return sum + (isNaN(n) ? 0 : n);
   }, 0);
+  const paidSales = paidOrders.reduce((sum, order) => {
+    const n = parseFloat(order.total_price || 0);
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+  const averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
 
   const salesByDay = buildSalesByDay(filteredOrders);
   const catalogGrowth = buildCatalogGrowth(filteredProducts);
@@ -201,6 +235,11 @@ export default async function OverviewPage({ searchParams }) {
     rangeLabel,
   };
 
+  const commercialSummary =
+    totalOrders > 0
+      ? `${totalOrders} ordenes en ${rangeLabel.toLowerCase()}, ticket promedio de ${formatCurrency(averageOrderValue)} y ${pendingOrders.length} ordenes con pago pendiente o parcial.`
+      : `Catalogo conectado con ${activeProductsTotal} productos activos y ${totalLeads} leads en ${rangeLabel.toLowerCase()}. Aun no hay ventas en este rango.`;
+
   return (
     <div>
       <h1 className="text-2xl font-semibold text-slate-50 mb-2">
@@ -218,20 +257,53 @@ export default async function OverviewPage({ searchParams }) {
 
       {/* KPIs principales */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <Card title="Productos activos" value={totalProducts} />
-        <Card title="Órdenes totales (muestra)" value={totalOrders} />
-        <Card title="Leads totales (muestra)" value={totalLeads} />
         <Card
-          title="Ventas totales (muestra)"
+          title="Productos activos"
+          value={activeProductsTotal}
+          detail={
+            range === 'all'
+              ? 'Catalogo activo completo'
+              : `${totalProducts} creados en ${rangeLabel.toLowerCase()}`
+          }
+        />
+        <Card title="Ordenes" value={totalOrders} detail={rangeLabel} />
+        <Card title="Leads" value={totalLeads} detail={rangeLabel} />
+        <Card
+          title="Ventas totales"
           value={formatCurrency(totalSales)}
+          detail={rangeLabel}
+        />
+      </div>
+
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <Card
+          title="Ventas pagadas"
+          value={formatCurrency(paidSales)}
+          detail={`${paidOrders.length} ordenes pagadas o parciales`}
+        />
+        <Card
+          title="Ticket promedio"
+          value={formatCurrency(averageOrderValue)}
+          detail="Venta promedio por orden"
+        />
+        <Card
+          title="Pagos pendientes"
+          value={pendingOrders.length}
+          detail="Pendientes, autorizadas o parciales"
+        />
+        <Card
+          title="Lectura comercial"
+          value={totalOrders > 0 ? 'Ventas activas' : 'Sin ventas en rango'}
+          detail={commercialSummary}
         />
       </div>
 
       {/* Estado de la tienda */}
       <div className="mb-6">
         <Card
-          title="Estado"
-          value={totalOrders > 0 ? 'Tienda en marcha' : 'En preparación'}
+          title="Estado comercial"
+          value={totalOrders > 0 ? 'Ventas activas' : 'Catalogo listo'}
+          detail={totalOrders > 0 ? rangeLabel : 'Esperando primeras ventas registradas'}
         />
       </div>
 

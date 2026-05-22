@@ -135,11 +135,29 @@ Crea un archivo:
 
     .env.local
 
+Para apps nuevas creadas en Shopify Dev Dashboard, agrega:
 
-Agrega:
+    SHOPIFY_SHOP_DOMAIN=your-shop.myshopify.com
+    SHOPIFY_CLIENT_ID=your_client_id
+    SHOPIFY_CLIENT_SECRET=your_client_secret
+
+La app genera el Admin API access token en servidor usando el flujo
+`client_credentials`.
+
+Si ya tienes una app legacy con token fijo, tambien puedes usar:
 
     SHOPIFY_SHOP_DOMAIN=your-shop.myshopify.com
     SHOPIFY_ADMIN_ACCESS_TOKEN=your_admin_api_token
+
+Permisos requeridos en Shopify Admin API:
+
+    read_products
+    read_customers
+    read_orders
+
+Opcional para historico de ordenes mayor a 60 dias:
+
+    read_all_orders
 
 # Install <a name="install"></a>
     npm install

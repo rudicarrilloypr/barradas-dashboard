@@ -26,6 +26,7 @@ export default function RangeSelect() {
     } else {
       params.set("range", value);
     }
+    params.delete("page");
 
     const query = params.toString();
     const url = query ? `${pathname}?${query}` : pathname;
