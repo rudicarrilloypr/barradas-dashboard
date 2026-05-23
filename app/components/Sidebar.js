@@ -7,12 +7,12 @@ import Image from "next/image";
 // import LogoMark from "./LogoMark"; // ya no lo usamos aquí
 
 const menuItems = [
-  { href: "/overview", label: "Overview" },
-  { href: "/sales", label: "Sales" },
-  { href: "/products", label: "Products" },
+  { href: "/overview", label: "Resumen" },
+  { href: "/sales", label: "Ventas" },
+  { href: "/products", label: "Catalogo" },
   { href: "/leads", label: "Leads" },
-  { href: "/insights", label: "Insights" },
-  { href: "/settings", label: "Settings" },
+  { href: "/insights", label: "Inteligencia" },
+  { href: "/settings", label: "Conexion" },
 ];
 
 export default function Sidebar() {

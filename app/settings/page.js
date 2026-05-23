@@ -6,6 +6,8 @@ import {
   getShopInfo,
 } from '../../src/lib/shopify';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SettingsPage() {
   let status = 'Desconectado';
   let shopName = null;

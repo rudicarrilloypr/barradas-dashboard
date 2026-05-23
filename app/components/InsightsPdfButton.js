@@ -16,128 +16,134 @@ export default function InsightsPdfButton({ report }) {
   const handleGeneratePdf = () => {
     const {
       generatedAt,
+      rangeLabel,
+      executiveSummary,
       totalSales,
       totalOrders,
+      averageOrderValue,
+      activeProducts,
+      productsWithIssues,
       totalLeads,
-      totalProducts,
-      bestMonthText,
-      leadsTrendText,
+      contactableLeads,
+      incompleteLeads,
+      decisionRows,
       topProducts,
-      salesByMonth,
-      leadsByMonth,
-      rangeLabel,
+      typeRows,
+      leadMonthRows,
     } = report;
 
     const doc = new jsPDF("p", "mm", "a4");
-
     let y = 15;
 
-    // Título
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
-    doc.text("Barradas Nexus - Reporte de Insights", 14, y);
+    doc.text("Barradas Nexus - Reporte ejecutivo", 14, y);
     y += 8;
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text(`Fecha de generación: ${generatedAt}`, 14, y);
+    doc.text(`Fecha de generacion: ${generatedAt}`, 14, y);
     y += 5;
     doc.text(`Rango analizado: ${rangeLabel}`, 14, y);
     y += 8;
 
-    // Resumen
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Resumen general", 14, y);
+    doc.text("Lectura ejecutiva", 14, y);
     y += 6;
 
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Ventas totales (muestra): ${formatCurrency(totalSales)}`, 14, y);
-    y += 5;
-    doc.text(`Órdenes analizadas: ${totalOrders}`, 14, y);
-    y += 5;
-    doc.text(`Leads totales (muestra): ${totalLeads}`, 14, y);
-    y += 5;
-    doc.text(`Productos en catálogo: ${totalProducts}`, 14, y);
-    y += 8;
-
-    // Insights de texto
-    doc.setFont("helvetica", "bold");
-    doc.text("Insights destacados", 14, y);
-    y += 6;
-
-    doc.setFont("helvetica", "normal");
-    const wrapBest = doc.splitTextToSize(bestMonthText, 180);
-    doc.text(wrapBest, 14, y);
-    y += wrapBest.length * 5 + 2;
-
-    const wrapLeads = doc.splitTextToSize(leadsTrendText, 180);
-    doc.text(wrapLeads, 14, y);
-    y += wrapLeads.length * 5 + 8;
-
-    // Top productos por ingresos
-    doc.setFont("helvetica", "bold");
-    doc.text("Top productos por ingresos", 14, y);
-    y += 4;
-
-    const topRows = (topProducts || []).map((p) => [
-      p.title,
-      String(p.quantity),
-      formatCurrency(p.revenue),
-    ]);
+    const summaryLines = doc.splitTextToSize(executiveSummary || "", 180);
+    doc.text(summaryLines, 14, y);
+    y += summaryLines.length * 5 + 8;
 
     autoTable(doc, {
       startY: y,
-      head: [["Producto", "Cantidad", "Ingresos"]],
-      body: topRows,
+      head: [["Indicador", "Valor"]],
+      body: [
+        ["Ventas", formatCurrency(totalSales)],
+        ["Ordenes", String(totalOrders)],
+        ["Ticket promedio", formatCurrency(averageOrderValue)],
+        ["Productos activos", String(activeProducts)],
+        ["Productos con alertas", String(productsWithIssues)],
+        ["Leads", String(totalLeads)],
+        ["Leads contactables", String(contactableLeads)],
+        ["Leads incompletos", String(incompleteLeads)],
+      ],
       styles: { fontSize: 9 },
       headStyles: { fillColor: [15, 23, 42] },
     });
 
-    let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : y + 10;
+    let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : y + 20;
 
-    // Ventas por mes
     doc.setFont("helvetica", "bold");
-    doc.text("Ventas por mes", 14, finalY);
+    doc.text("Acciones recomendadas", 14, finalY);
     finalY += 4;
-
-    const salesRows = (salesByMonth || []).map((m) => [
-      m.month,
-      formatCurrency(m.total),
-    ]);
 
     autoTable(doc, {
       startY: finalY,
-      head: [["Mes", "Ventas"]],
-      body: salesRows,
+      head: [["Area", "Prioridad", "Lectura", "Accion"]],
+      body: (decisionRows || []).map((row) => [
+        row.area,
+        row.priority,
+        row.insight,
+        row.action,
+      ]),
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [15, 23, 42] },
+    });
+
+    finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : finalY + 20;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Mix de catalogo", 14, finalY);
+    finalY += 4;
+
+    autoTable(doc, {
+      startY: finalY,
+      head: [["Categoria", "Productos"]],
+      body: (typeRows || []).map((row) => [row.label, String(row.value)]),
       styles: { fontSize: 9 },
       headStyles: { fillColor: [15, 23, 42] },
     });
 
-    finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : finalY + 10;
+    finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : finalY + 20;
 
-    // Leads por mes
     doc.setFont("helvetica", "bold");
     doc.text("Leads por mes", 14, finalY);
     finalY += 4;
 
-    const leadsRows = (leadsByMonth || []).map((m) => [
-      m.month,
-      String(m.count),
-    ]);
-
     autoTable(doc, {
       startY: finalY,
       head: [["Mes", "Leads"]],
-      body: leadsRows,
+      body: (leadMonthRows || []).map((row) => [row.label, String(row.value)]),
       styles: { fontSize: 9 },
       headStyles: { fillColor: [15, 23, 42] },
     });
 
-    const now = new Date();
-    const stamp = now.toISOString().slice(0, 10);
-    doc.save(`barradas-nexus-insights-${stamp}.pdf`);
+    finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : finalY + 20;
+
+    if ((topProducts || []).length > 0) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Top productos por ingresos", 14, finalY);
+      finalY += 4;
+
+      autoTable(doc, {
+        startY: finalY,
+        head: [["Producto", "Unidades", "Ingresos"]],
+        body: topProducts.map((product) => [
+          product.title,
+          String(product.quantity),
+          formatCurrency(product.revenue),
+        ]),
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [15, 23, 42] },
+      });
+    }
+
+    const stamp = new Date().toISOString().slice(0, 10);
+    doc.save(`barradas-nexus-reporte-ejecutivo-${stamp}.pdf`);
   };
 
   return (
@@ -145,8 +151,8 @@ export default function InsightsPdfButton({ report }) {
       onClick={handleGeneratePdf}
       className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-slate-50 border border-blue-500 shadow-sm shadow-blue-900/40 transition-colors mb-4"
     >
-      Descargar Reporte en PDF
-      <span className="text-[10px] opacity-80">Insights</span>
+      Descargar Reporte Ejecutivo
+      <span className="text-[10px] opacity-80">PDF</span>
     </button>
   );
 }

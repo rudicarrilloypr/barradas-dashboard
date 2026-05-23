@@ -1,232 +1,339 @@
-<a name="readme-top"></a>
+# Barradas Nexus
 
-<div align="center"> <img src="./public/icon.png" alt="Barradas Nexus Logo" width="40" height="auto" /> <h2><b>Barradas Nexus ⚡</b></h2> <p><i>Dashboard comercial interno conectado 100% en tiempo real con Shopify.</i></p> <!---<img src="./app/assets/banner_nexus.png" alt="Barradas Nexus Banner"/> </div> --->
+Dashboard comercial interno para Barradas, conectado a Shopify.
 
+En palabras simples: esta app toma informacion de la tienda Shopify y la convierte en pantallas faciles de leer para saber como va el negocio, que productos estan listos para vender, que contactos se pueden trabajar y que acciones conviene tomar.
 
-📘 Table of Contents
-<div align="left">
+Repositorio: `rudicarrilloypr/barradas-dashboard`
 
-- [📖 About the Project](#barradas-nexus)
-- [🛠 Built with](#built-with)
-  - [Tech Stack](#tech-stack)
-  - [Key Features](#key-features)
-- [🚀 Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Setup](#setup)
-  - [Environment Variables](#environment-variables)
-  - [Install](#install)
-  - [Run](#run)
-- [📊 Modules Overview](#modules-overview)
-- [👥 Author](#author)
-- [🙏 Acknowledgements](#acknowledgements)
-- [🔮 Future Features](#future-features)
-- [🤝 Contributing](#contributing)
-- [⭐ Show Your Support](#show-your-support)
-- [📝 License](#license)
+## Que hace la app
 
+Barradas Nexus es una app web interna. No es la tienda publica, no vende directamente y no reemplaza Shopify. Su trabajo es leer datos de Shopify y mostrarlos como reportes comerciales.
 
-## Barradas Nexus<a name="barradas-nexus"></a>
+La app ayuda a responder preguntas como:
 
-Barradas Nexus is an internal, production-ready commercial dashboard designed for Barradas.mx.
-It integrates directly with Shopify Admin API, providing real-time analytics, catalog insights, sales tracking, lead management, and auto-generated PDF business reports—all within an elegant and responsive interface.
+- Cuantos productos activos hay en el catalogo.
+- Si hay productos sin imagen, sin tipo, sin precio o sin stock.
+- Cuantas ordenes existen y cuanto se ha vendido.
+- Cual es el ticket promedio.
+- Cuantos clientes o leads hay registrados.
+- Cuantos leads tienen datos utiles para seguimiento.
+- Que acciones comerciales conviene revisar primero.
+- Como generar un PDF sencillo para compartir un resumen.
 
-This app replaces the need for manual reports and fragmented data by centralizing KPIs, trends, growth indicators, and operational information in a single unified tool.
+## Que NO hace
 
-## Built With<a name="built-with"></a>
+Para evitar confusiones:
 
-- Next.js 14 (App Router + Server Components)
-- TailwindCSS
+- No procesa pagos.
+- No modifica productos en Shopify.
+- No cambia inventario.
+- No envia correos ni WhatsApps.
+- No crea campanas de marketing.
+- No mide palabras buscadas dentro del buscador de la tienda todavia.
+- No muestra informacion si Shopify no esta conectado o si faltan permisos.
+
+## De donde salen los datos
+
+La app lee datos desde la Shopify Admin API:
+
+- Productos: `read_products`
+- Ordenes: `read_orders`
+- Clientes/leads: `read_customers`
+
+Si se quiere leer historial de ordenes mas antiguo, Shopify puede requerir:
+
+- `read_all_orders`
+
+Los datos se consultan desde el servidor de Next.js. Las llaves de Shopify viven en `.env.local`, por eso no se suben a GitHub.
+
+## Secciones de la app
+
+### Resumen
+
+Es la pantalla principal.
+
+Sirve para ver rapidamente el estado general del negocio:
+
+- Ventas del rango seleccionado.
+- Ordenes totales.
+- Ticket promedio.
+- Productos activos.
+- Leads registrados.
+- Leads del periodo.
+- Graficas de ventas, catalogo y leads.
+- Boton para descargar un PDF de resumen comercial.
+
+Uso recomendado: abrir esta seccion para una lectura rapida antes de tomar decisiones.
+
+### Ventas
+
+Muestra las ordenes que vienen de Shopify.
+
+Ayuda a revisar:
+
+- Total vendido.
+- Numero de ordenes.
+- Estado de pago.
+- Cliente.
+- Fecha.
+- Evolucion de ventas por dia.
+
+Uso recomendado: revisar si hay ventas nuevas, pagos pendientes o comportamiento por periodo.
+
+### Catalogo
+
+Antes se sentia como una lista de productos. Ahora funciona mas como una auditoria comercial del catalogo.
+
+Mide:
+
+- Productos activos.
+- Productos en borrador.
+- Productos archivados.
+- Productos con alertas.
+- Productos sin imagen.
+- Productos sin tipo.
+- Productos con stock bajo.
+- Productos sin stock.
+- Categorias con mas productos.
+- Lista de productos con precio, stock y alertas.
+
+Uso recomendado: revisar que el catalogo este listo antes de invertir en publicidad o enviar trafico a la tienda.
+
+### Leads
+
+Muestra clientes/contactos registrados en Shopify.
+
+Mide:
+
+- Leads totales.
+- Leads contactables.
+- Leads con email.
+- Leads con telefono.
+- Leads incompletos.
+- Pais principal.
+- Evolucion mensual de leads.
+- Calidad de cada contacto.
+
+Un lead contactable es alguien que tiene email o telefono. Un lead incompleto puede tener datos faltantes como nombre, telefono, email o pais.
+
+Uso recomendado: saber si los contactos realmente sirven para seguimiento comercial.
+
+### Inteligencia
+
+Es la seccion ejecutiva.
+
+Cruza ventas, catalogo y leads para dar una lectura mas practica:
+
+- Resumen ejecutivo.
+- Ventas del periodo.
+- Ticket promedio.
+- Catalogo activo.
+- Leads contactables.
+- Acciones recomendadas.
+- Prioridades por area.
+- Mix de catalogo.
+- Captacion de leads.
+- Top productos por ingresos cuando ya existan ventas.
+- PDF de reporte ejecutivo.
+
+Uso recomendado: usar esta seccion para juntas, decisiones semanales o revision comercial.
+
+### Conexion
+
+Muestra si la app esta conectada correctamente con Shopify.
+
+Ayuda a revisar:
+
+- Dominio de tienda conectado.
+- Version de API de Shopify.
+- Modo de autenticacion.
+- Permisos necesarios.
+- Estado de conexion.
+
+Uso recomendado: revisar esta seccion cuando la app no carga datos o cuando se cambian permisos en Shopify.
+
+## Rangos de fecha
+
+Varias secciones permiten elegir el rango:
+
+- Ultimos 30 dias.
+- Ultimos 90 dias.
+- Ano en curso.
+- Todo el historial.
+
+Esto sirve para comparar informacion reciente contra informacion historica.
+
+## PDF de reportes
+
+La app puede generar PDFs desde:
+
+- Resumen: PDF de resumen comercial.
+- Inteligencia: PDF de reporte ejecutivo.
+
+Los PDFs estan pensados para compartir una lectura rapida, no para reemplazar un reporte contable formal.
+
+## Rendimiento y carga
+
+La app consulta Shopify en vivo, pero usa una cache corta para que no se sienta lenta al cambiar de seccion.
+
+Por defecto, la cache dura 60 segundos.
+
+Se puede cambiar con:
+
+```env
+SHOPIFY_CACHE_TTL_MS=60000
+```
+
+Si el valor es `0`, se desactiva la cache y cada seccion consulta Shopify desde cero.
+
+## Tecnologias usadas
+
+- Next.js 16
+- React 19
+- Tailwind CSS
 - Shopify Admin REST API
 - Recharts
-- jsPDF + jspdf-autotable
-- Node.js 20+
+- jsPDF
+- jspdf-autotable
 
-# Tech Stack <a name="tech-stack"></a>
-<details> <summary>Client</summary> <ul> <li>Next.js App Router</li> <li>TailwindCSS</li> <li>Recharts</li> </ul> </details> <details> <summary>Server</summary> <ul> <li>Next.js Server Components</li> <li>Shopify Admin API</li> </ul> </details> <details> <summary>Utilities</summary> <ul> <li>jsPDF</li> <li>jspdf-autotable</li> </ul> </details>
+## Como correr la app en local
 
-## Key Features <a name="key-features"></a>
-📊 Overview Dashboard
+### 1. Instalar dependencias
 
-- KPIs: ventas, productos, leads, órdenes.
+```bash
+npm install
+```
 
-- Gráficas de crecimiento del catálogo.
+### 2. Crear `.env.local`
 
-- Tendencia de ventas por día.
+En la raiz del proyecto, crear un archivo llamado:
 
-- Tendencia de leads acumulados.
+```text
+.env.local
+```
 
-- Selector de rango dinámico: 30d, 90d, YTD, All time.
+### 3. Configurar Shopify
 
-- Exportación a PDF empresarial.
+Para una app nueva de Shopify Dev Dashboard:
 
-💰 Sales Module
+```env
+SHOPIFY_SHOP_DOMAIN=tu-tienda.myshopify.com
+SHOPIFY_CLIENT_ID=tu_client_id
+SHOPIFY_CLIENT_SECRET=tu_client_secret
+```
 
-- Listado de órdenes sincronizadas con Shopify.
+Importante: `SHOPIFY_SHOP_DOMAIN` debe ser el dominio original de Shopify, normalmente termina en `.myshopify.com`. No uses el dominio conectado en GoDaddy.
 
-- Total de ventas, estados, clientes y fechas.
+Si se usa una app legacy con token fijo:
 
-- Gráfica de ventas por día (real time).
+```env
+SHOPIFY_SHOP_DOMAIN=tu-tienda.myshopify.com
+SHOPIFY_ADMIN_ACCESS_TOKEN=tu_admin_api_token
+```
 
-📦 Products
+### 4. Revisar permisos en Shopify
 
-- Catálogo directo desde Shopify.
+La app necesita permisos de lectura:
 
-- Soporte para paginación y grandes inventarios.
+```text
+read_products
+read_orders
+read_customers
+```
 
-👥 Leads (Clientes)
+Opcional:
 
-- Lista de clientes/leads registrados en Shopify.
+```text
+read_all_orders
+```
 
-- Crecimiento acumulado por día.
+### 5. Levantar la app
 
-- Estadísticas de adquisición.
+```bash
+npm run dev
+```
 
-📈 Insights
+Luego abrir:
 
-- Top productos por ingresos.
+```text
+http://localhost:3000
+```
 
-- Ventas por mes.
+## Comandos utiles
 
-- Leads por mes.
+Revisar errores de estilo/codigo:
 
-- Tendencias automáticas.
+```bash
+npm run lint
+```
 
-- Reporte PDF corporativo completo.
+Crear build de produccion:
 
-⚙️ Settings
+```bash
+npm run build
+```
 
-- Información del usuario.
+Arrancar build de produccion:
 
-- Estado de API e integraciones.
+```bash
+npm run start
+```
 
-- Future system config.
+## Problemas comunes
 
-#  Getting Started <a name="getting-started"></a>
-##  Prerequisites <a name="prerequisites"></a>
+### La app no carga datos
 
- Asegúrate de tener instalado:
+Revisar:
 
-    Node.js v18+
+- Que `.env.local` exista.
+- Que el dominio sea `tu-tienda.myshopify.com`.
+- Que las llaves de Shopify esten correctas.
+- Que la app de Shopify tenga permisos actualizados.
+- Que la app este instalada en la tienda correcta.
 
-    npm 9+
+### Las ordenes no aparecen completas
 
-Una tienda de Shopify y un Admin API Token con permisos:
+Shopify puede limitar historial de ordenes si no esta aprobado o configurado el permiso `read_all_orders`.
 
-    read_products
+### La app tarda en cargar
 
-    read_customers
+La primera carga puede tardar porque consulta Shopify. Despues, la cache corta ayuda a que navegar entre secciones sea mas rapido.
 
-    read_orders
+### Veo cero ventas
 
-## Setup <a name="setup"></a>
+Eso puede ser normal si la tienda todavia no tiene ordenes reales o si el rango seleccionado no incluye ventas.
 
-Clona el repositorio:
+## Estado actual del proyecto
 
-    git clone git@github.com:rudicarrilloypr/barradas-nexus.git
+La app ya cuenta con:
 
+- Conexion a Shopify.
+- Dashboard general.
+- Modulo de ventas.
+- Salud del catalogo.
+- Calidad de leads.
+- Inteligencia comercial.
+- Exportacion a PDF.
+- Cache corta para mejorar velocidad.
+- Pantalla de carga.
+- Navegacion interna.
 
-Entra al proyecto:
+Pendientes posibles a futuro:
 
-    cd barradas-nexus
+- Medir palabras buscadas en el buscador de la tienda.
+- Exportar reportes a Excel.
+- Alertas automaticas de stock o ventas bajas.
+- Comparativos contra periodos anteriores.
+- Roles de usuario.
+- Instalacion como app de escritorio o PWA mas completa.
 
-## Environment Variables <a name="env"></a>
+## Autor
 
-Crea un archivo:
+Rodolfo Carrillo
 
-    .env.local
+GitHub: `@rudicarrilloypr`
 
-Para apps nuevas creadas en Shopify Dev Dashboard, agrega:
+## Licencia
 
-    SHOPIFY_SHOP_DOMAIN=your-shop.myshopify.com
-    SHOPIFY_CLIENT_ID=your_client_id
-    SHOPIFY_CLIENT_SECRET=your_client_secret
-
-La app genera el Admin API access token en servidor usando el flujo
-`client_credentials`.
-
-Si ya tienes una app legacy con token fijo, tambien puedes usar:
-
-    SHOPIFY_SHOP_DOMAIN=your-shop.myshopify.com
-    SHOPIFY_ADMIN_ACCESS_TOKEN=your_admin_api_token
-
-Permisos requeridos en Shopify Admin API:
-
-    read_products
-    read_customers
-    read_orders
-
-Opcional para historico de ordenes mayor a 60 dias:
-
-    read_all_orders
-
-# Install <a name="install"></a>
-    npm install
-
-## Run <a name="run"></a>
-
-Modo desarrollo:
-
-    npm run dev
-
-
-Luego visita:
-
-    http://localhost:3000
-
-#  Modules Overview <a name="modules"></a>
-* Módulo 
-  - Descripción
-* Overview	
-  - KPIs globales + rango + PDF
-* Sales	
-  - Detalle de órdenes desde Shopify
-* Products
-  -	Catálogo en tiempo real
-* Leads	
-  - Clientes/leads + crecimiento
-* Insights
-  - Inteligencia comercial + PDF avanzado
-* Settings
-  - Información del usuario y estado del sistema
-# Author <a name="authors"></a>
-
-👤 Rodolfo Carrillo
-
-GitHub: @rudicarrilloypr
-
-Twitter: @__rudicarrillo
-
-LinkedIn: Rudi Carrillo
-
-# Acknowledgements <a name="acknowledgements"></a>
-
-A todo el equipo de Barradas por confiar en el desarrollo del nuevo ecosistema digital.
-Y a todos quienes aportaron ideas para la evolución del dashboard.
-
-# Future Features <a name="future-features"></a>
-
-- Multi-sucursal & multi-inventario.
-
-- Gráficas avanzadas (funnels, cohortes, heatmaps).
-
-- Alerts automáticos (ventas bajas, alta demanda, SKUs agotados).
-
-- User roles y permisos por perfil.
-
-- Exportación en Excel.
-
-- Dark/Light theme switch.
-
-# Contributing <a name="contributing"></a>
-
-Contribuciones son bienvenidas.
-Haz un fork, crea un branch, envía un pull request.
-
-# Show Your Support <a name="support"></a>
-
-Si este proyecto te es útil, dale una ⭐ en GitHub o compártelo con tu equipo.
-
-# License <a name="license"></a>
-
-Este proyecto está bajo la licencia MIT.
-</div>
+Proyecto interno/comercial de Barradas.

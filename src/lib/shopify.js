@@ -9,9 +9,17 @@ const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
 const API_VERSION = '2026-04';
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000;
 const PAGE_LIMIT = 250;
+const DEFAULT_CACHE_TTL_MS = 60 * 1000;
+
+function getCacheTtlMs() {
+  const ttl = Number(process.env.SHOPIFY_CACHE_TTL_MS ?? DEFAULT_CACHE_TTL_MS);
+  return Number.isFinite(ttl) && ttl > 0 ? ttl : 0;
+}
 
 let cachedAccessToken = null;
 let cachedAccessTokenExpiresAt = 0;
+const requestCache = globalThis.__barradasShopifyRequestCache || new Map();
+globalThis.__barradasShopifyRequestCache = requestCache;
 
 function normalizeShopDomain(value) {
   if (!value) return null;
@@ -111,32 +119,66 @@ export const SHOPIFY_AUTH_MODE = ADMIN_TOKEN
 async function shopifyFetch(pathOrUrl) {
   const accessToken = await getAdminAccessToken();
   const url = buildAdminApiUrl(pathOrUrl);
+  const cacheTtlMs = getCacheTtlMs();
+  const cached = requestCache.get(url);
 
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'X-Shopify-Access-Token': accessToken,
-      'Content-Type': 'application/json',
-    },
-    cache: 'no-store',
-  });
-
-  if (!res.ok) {
-    const bodyText = await res.text();
-    console.error('Error Shopify:', res.status, bodyText);
-
-    // If customers scope is missing, keep the rest of the dashboard usable.
-    if (res.status === 403 && pathOrUrl.startsWith('customers')) {
-      return { data: { customers: [] }, nextPageUrl: null };
+  if (cacheTtlMs > 0 && cached) {
+    if (cached.value && cached.expiresAt > Date.now()) {
+      return cached.value;
     }
 
-    throw new Error('Error al consultar Shopify');
+    if (cached.promise) {
+      return cached.promise;
+    }
   }
 
-  return {
-    data: await res.json(),
-    nextPageUrl: getNextPageUrl(res.headers.get('link')),
-  };
+  const requestPromise = (async () => {
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-Shopify-Access-Token': accessToken,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const bodyText = await res.text();
+      console.error('Error Shopify:', res.status, bodyText);
+
+      // If customers scope is missing, keep the rest of the dashboard usable.
+      if (res.status === 403 && pathOrUrl.startsWith('customers')) {
+        return { data: { customers: [] }, nextPageUrl: null };
+      }
+
+      throw new Error('Error al consultar Shopify');
+    }
+
+    return {
+      data: await res.json(),
+      nextPageUrl: getNextPageUrl(res.headers.get('link')),
+    };
+  })();
+
+  if (cacheTtlMs > 0) {
+    requestCache.set(url, { promise: requestPromise });
+  }
+
+  try {
+    const value = await requestPromise;
+
+    if (cacheTtlMs > 0) {
+      requestCache.set(url, {
+        value,
+        expiresAt: Date.now() + cacheTtlMs,
+      });
+    }
+
+    return value;
+  } catch (error) {
+    requestCache.delete(url);
+    throw error;
+  }
 }
 
 async function shopifyRequest(path) {

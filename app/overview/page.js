@@ -6,6 +6,8 @@ import LeadsGrowthChart from '../../app/components/charts/LeadsGrowthChart';
 import OverviewPdfButton from '../../app/components/OverviewPdfButton';
 import RangeSelect from '../../app/components/RangeSelect';
 
+export const dynamic = 'force-dynamic';
+
 function Card({ title, value, detail }) {
   return (
     <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
@@ -182,9 +184,11 @@ export default async function OverviewPage({ searchParams }) {
   let customers = [];
 
   try {
-    products = await getProducts();
-    orders = await getOrders();
-    customers = await getCustomers();
+    [products, orders, customers] = await Promise.all([
+      getProducts(),
+      getOrders(),
+      getCustomers(),
+    ]);
   } catch (error) {
     console.error(error);
   }
@@ -223,22 +227,27 @@ export default async function OverviewPage({ searchParams }) {
   // Datos para el PDF
   const generatedAt = new Date().toLocaleString('es-MX');
 
+  const commercialSummary =
+    totalOrders > 0
+      ? `${totalOrders} ordenes en ${rangeLabel.toLowerCase()}, ticket promedio de ${formatCurrency(averageOrderValue)} y ${pendingOrders.length} ordenes con pago pendiente o parcial.`
+      : `Catalogo conectado con ${activeProductsTotal} productos activos y ${totalLeads} leads en ${rangeLabel.toLowerCase()}. Aun no hay ventas en este rango.`;
+
   const report = {
     generatedAt,
     totalProducts,
+    activeProductsTotal,
     totalOrders,
     totalLeads,
     totalSales,
+    paidSales,
+    averageOrderValue,
+    pendingOrdersCount: pendingOrders.length,
+    commercialSummary,
     salesByDay,
     catalogGrowth,
     leadsGrowth,
     rangeLabel,
   };
-
-  const commercialSummary =
-    totalOrders > 0
-      ? `${totalOrders} ordenes en ${rangeLabel.toLowerCase()}, ticket promedio de ${formatCurrency(averageOrderValue)} y ${pendingOrders.length} ordenes con pago pendiente o parcial.`
-      : `Catalogo conectado con ${activeProductsTotal} productos activos y ${totalLeads} leads en ${rangeLabel.toLowerCase()}. Aun no hay ventas en este rango.`;
 
   return (
     <div>

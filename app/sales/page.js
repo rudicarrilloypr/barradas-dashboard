@@ -3,6 +3,8 @@ import Pagination from '../../app/components/Pagination';
 import RangeSelect from '../../app/components/RangeSelect';
 import SalesChart from '../../app/components/charts/SalesChart';
 
+export const dynamic = 'force-dynamic';
+
 const PAGE_SIZE = 10;
 
 function Card({ title, value, detail }) {
