@@ -141,7 +141,13 @@ function getLeadIssues(customer) {
   if (!hasEmail(customer)) issues.push('sin email');
   if (!hasPhone(customer)) issues.push('sin telefono');
   if (!customer.first_name && !customer.last_name) issues.push('sin nombre');
+  if (!customer.default_address?.country) issues.push('sin pais');
   return issues;
+}
+
+function formatPercent(value) {
+  if (!isFinite(value)) return '0%';
+  return `${Math.round(value)}%`;
 }
 
 function buildTypeRows(products) {
@@ -197,6 +203,76 @@ function buildTopProductsByRevenue(orders, limit = 5) {
   return Array.from(map.values())
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, limit);
+}
+
+function buildProductIssueSummaryRows(products) {
+  const issueLabels = [
+    'sin imagen',
+    'sin tipo',
+    'sin precio',
+    'sin stock',
+    'stock bajo',
+    'no activo',
+  ];
+  const counts = new Map(issueLabels.map((issue) => [issue, 0]));
+
+  for (const product of products) {
+    for (const issue of getProductIssues(product)) {
+      counts.set(issue, (counts.get(issue) || 0) + 1);
+    }
+  }
+
+  return issueLabels.map((issue) => ({
+    issue,
+    count: counts.get(issue) || 0,
+  }));
+}
+
+function buildProductIssueRows(products) {
+  return products
+    .filter((product) => getProductIssues(product).length > 0)
+    .map((product) => ({
+      title: product.title || 'Producto sin nombre',
+      status: product.status || 'sin estado',
+      type: product.product_type || 'Sin tipo',
+      stock: getInventoryTotal(product),
+      price: getProductPrice(product),
+      issues: getProductIssues(product).join(', '),
+    }));
+}
+
+function buildLeadQualityRows(customers, contactableLeads, incompleteLeads) {
+  const total = customers.length;
+  const withEmail = customers.filter(hasEmail).length;
+  const withPhone = customers.filter(hasPhone).length;
+
+  return [
+    {
+      metric: 'Leads totales',
+      value: total,
+      detail: 'Contactos registrados en el rango seleccionado.',
+    },
+    {
+      metric: 'Contactables',
+      value: contactableLeads.length,
+      detail: `${formatPercent(total ? (contactableLeads.length / total) * 100 : 0)} con email o telefono.`,
+    },
+    {
+      metric: 'Con email',
+      value: withEmail,
+      detail: `${formatPercent(total ? (withEmail / total) * 100 : 0)} del total del rango.`,
+    },
+    {
+      metric: 'Con telefono',
+      value: withPhone,
+      detail: `${formatPercent(total ? (withPhone / total) * 100 : 0)} del total del rango.`,
+    },
+    {
+      metric: 'Incompletos',
+      value: incompleteLeads.length,
+      detail: `${formatPercent(total ? (incompleteLeads.length / total) * 100 : 0)} con algun dato faltante.`,
+    },
+  ];
 }
 
 function getDecisionRows({
@@ -301,6 +377,13 @@ export default async function InsightsPage({ searchParams }) {
   const topProducts = buildTopProductsByRevenue(filteredOrders);
   const typeRows = buildTypeRows(products);
   const leadMonthRows = buildLeadMonthRows(customers);
+  const productIssueSummaryRows = buildProductIssueSummaryRows(products);
+  const productIssueRows = buildProductIssueRows(products);
+  const leadQualityRows = buildLeadQualityRows(
+    filteredCustomers,
+    contactableLeads,
+    incompleteLeads
+  );
   const decisionRows = getDecisionRows({
     filteredOrders,
     productsWithIssues,
@@ -330,6 +413,10 @@ export default async function InsightsPage({ searchParams }) {
     topProducts,
     typeRows,
     leadMonthRows,
+    productIssueSummaryRows,
+    productIssueRows,
+    leadQualityRows,
+    sourceLabel: 'Shopify Admin API',
   };
 
   return (

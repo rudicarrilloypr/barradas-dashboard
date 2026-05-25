@@ -171,6 +171,34 @@ function buildLeadsGrowth(customers) {
   });
 }
 
+function formatDate(value) {
+  if (!value) return 'Sin fecha';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return 'Sin fecha';
+  return date.toISOString().slice(0, 10);
+}
+
+function getCustomerName(customer) {
+  if (!customer) return 'Sin cliente';
+  return `${customer.first_name || ''} ${customer.last_name || ''}`.trim() ||
+    customer.email ||
+    customer.phone ||
+    'Sin cliente';
+}
+
+function buildRecentOrderRows(orders) {
+  return [...orders]
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+    .map((order) => ({
+      date: formatDate(order.created_at),
+      order: order.name || `#${order.order_number || order.id || 'N/A'}`,
+      customer: getCustomerName(order.customer),
+      paymentStatus: order.financial_status || 'sin estado',
+      fulfillmentStatus: order.fulfillment_status || 'sin fulfillment',
+      total: parseFloat(order.total_price || 0) || 0,
+    }));
+}
+
 export default async function OverviewPage({ searchParams }) {
   // 👇 desempaquetar el Promise
   const sp = await searchParams;
@@ -223,6 +251,7 @@ export default async function OverviewPage({ searchParams }) {
   const salesByDay = buildSalesByDay(filteredOrders);
   const catalogGrowth = buildCatalogGrowth(filteredProducts);
   const leadsGrowth = buildLeadsGrowth(filteredCustomers);
+  const recentOrderRows = buildRecentOrderRows(filteredOrders);
 
   // Datos para el PDF
   const generatedAt = new Date().toLocaleString('es-MX');
@@ -242,11 +271,16 @@ export default async function OverviewPage({ searchParams }) {
     paidSales,
     averageOrderValue,
     pendingOrdersCount: pendingOrders.length,
+    paidOrdersCount: paidOrders.length,
     commercialSummary,
     salesByDay,
     catalogGrowth,
     leadsGrowth,
+    recentOrderRows,
     rangeLabel,
+    totalProductsInStore: products.length,
+    totalCustomersInStore: customers.length,
+    sourceLabel: 'Shopify Admin API',
   };
 
   return (
