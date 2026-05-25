@@ -1,10 +1,8 @@
-// app/components/Sidebar.js
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
-// import LogoMark from "./LogoMark"; // ya no lo usamos aquí
 
 const menuItems = [
   { href: "/overview", label: "Resumen" },
@@ -12,27 +10,20 @@ const menuItems = [
   { href: "/products", label: "Catalogo" },
   { href: "/leads", label: "Leads" },
   { href: "/insights", label: "Inteligencia" },
+  { href: "/assistant", label: "Asistente" },
   { href: "/settings", label: "Conexion" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
 
-  const asideClass =
-    "w-full md:w-60 bg-slate-950 border-b md:border-b-0 md:border-r border-slate-800 px-4 py-3 md:px-5 md:py-6 flex flex-col gap-3";
-
-  const navClass =
-    "flex md:flex-col gap-2 mt-1 overflow-x-auto md:overflow-visible pb-1 md:pb-0";
-
   return (
-    <aside className={asideClass}>
-      {/* Logo + nombre */}
+    <aside className="flex w-full flex-col gap-3 border-b border-slate-800 bg-slate-950 px-4 py-3 md:w-60 md:border-b-0 md:border-r md:px-5 md:py-6">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          {/* Icono de la app (solo aquí en el sidebar) */}
           <div className="shrink-0">
             <Image
-              src="/icon.png" // ⬅️ cambia a la ruta/nombre real de tu icono
+              src="/icon.png"
               alt="Barradas Nexus Icon"
               width={28}
               height={28}
@@ -41,7 +32,7 @@ export default function Sidebar() {
           </div>
 
           <div className="flex flex-col leading-tight">
-            <span className="font-semibold tracking-wide text-xs md:text-sm">
+            <span className="text-xs font-semibold tracking-wide md:text-sm">
               Barradas Nexus
             </span>
             <span className="text-[10px] text-slate-500">
@@ -49,23 +40,23 @@ export default function Sidebar() {
             </span>
           </div>
         </div>
-        <span className="text-[10px] md:text-xs text-slate-500 uppercase">
+        <span className="text-[10px] uppercase text-slate-500 md:text-xs">
           Beta
         </span>
       </div>
 
-      <nav className={navClass}>
+      <nav className="mt-1 flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
         {menuItems.map((item) => {
           const isActive =
             pathname === item.href ||
             (item.href !== "/" && pathname.startsWith(item.href));
 
           const base =
-            "px-3 py-2 rounded-md text-sm whitespace-nowrap transition-colors border";
+            "rounded-md border px-3 py-2 text-sm whitespace-nowrap transition-colors";
           const active =
-            "bg-blue-600 text-slate-50 border-blue-500 shadow-sm shadow-blue-900/40";
+            "border-blue-500 bg-blue-600 text-slate-50 shadow-sm shadow-blue-900/40";
           const inactive =
-            "bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-900 hover:border-slate-600";
+            "border-slate-800 bg-slate-950 text-slate-200 hover:border-slate-600 hover:bg-slate-900";
 
           return (
             <Link

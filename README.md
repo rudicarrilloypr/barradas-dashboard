@@ -173,6 +173,67 @@ La app puede generar PDFs desde:
 
 Los PDFs estan pensados para compartir una lectura rapida, no para reemplazar un reporte contable formal.
 
+## MVP de asistente para Shopify
+
+La app incluye un primer MVP de asistente virtual para la tienda. El asistente
+se llama Barry y usa un icono de pinguino como mascota:
+
+- Pagina interna de prueba: `http://localhost:3000/assistant`
+- Preview del widget: `http://localhost:3000/assistant-widget-preview.html`
+- Endpoint: `POST /api/shopify-assistant`
+- Widget publico: `/shopify-assistant.js`
+
+El asistente lee el catalogo real de Shopify, busca coincidencias por nombre,
+categoria, etiquetas, descripcion, SKU/modelos y escritura aproximada. Devuelve
+recomendaciones con precio, disponibilidad, imagen y link al producto.
+
+Si el cliente pide un humano, asesor, WhatsApp, llamada o contacto, Barry deja
+de recomendar productos y muestra la accion de contacto con asesor.
+
+Para incrustarlo en Shopify despues de desplegar la app:
+
+```html
+<script
+  src="https://TU-DOMINIO/shopify-assistant.js"
+  data-store-name="Barradas"
+  data-assistant-name="Barry"
+  data-advisor-url="https://wa.me/52NUMERO?text=Hola%2C%20quiero%20hablar%20con%20un%20asesor"
+  defer
+></script>
+```
+
+Opcionalmente se puede personalizar:
+
+```html
+<script
+  src="https://TU-DOMINIO/shopify-assistant.js"
+  data-store-name="Barradas"
+  data-assistant-name="Barry"
+  data-accent="#2563eb"
+  data-mascot-url="https://TU-DOMINIO/barry-avatar.png"
+  data-advisor-url="https://wa.me/52NUMERO?text=Hola%2C%20quiero%20hablar%20con%20un%20asesor"
+  defer
+></script>
+```
+
+Variables opcionales:
+
+```env
+SHOPIFY_STOREFRONT_DOMAIN=barradas.mx
+SHOPIFY_ASSISTANT_ALLOWED_ORIGIN=https://barradas.mx
+SHOPIFY_ASSISTANT_ADVISOR_URL=https://wa.me/52NUMERO?text=Hola%2C%20quiero%20hablar%20con%20un%20asesor
+```
+
+Como alternativa a `SHOPIFY_ASSISTANT_ADVISOR_URL`, se puede configurar solo el
+telefono:
+
+```env
+SHOPIFY_ASSISTANT_WHATSAPP_PHONE=52NUMERO
+```
+
+Si no se configura `SHOPIFY_STOREFRONT_DOMAIN`, los links de productos usan
+`SHOPIFY_SHOP_DOMAIN`.
+
 ## Rendimiento y carga
 
 La app consulta Shopify en vivo, pero usa una cache corta para que no se sienta lenta al cambiar de seccion.

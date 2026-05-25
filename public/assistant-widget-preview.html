@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Preview asistente Shopify</title>
+    <style>
+      body {
+        margin: 0;
+        background: #f8fafc;
+        color: #0f172a;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      header {
+        border-bottom: 1px solid #e2e8f0;
+        background: #ffffff;
+        padding: 18px 28px;
+      }
+
+      main {
+        display: grid;
+        gap: 22px;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        margin: 0 auto;
+        max-width: 1100px;
+        padding: 36px 22px;
+      }
+
+      .hero,
+      .panel {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+      }
+
+      .hero h1 {
+        font-size: 34px;
+        line-height: 1.1;
+        margin: 0 0 12px;
+      }
+
+      .hero p,
+      .panel p {
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 22px;
+      }
+
+      .item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        min-height: 130px;
+        padding: 16px;
+      }
+
+      .item strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      @media (max-width: 820px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>Barradas</strong>
+    </header>
+    <main>
+      <section class="hero">
+        <h1>Tienda de prueba</h1>
+        <p>
+          Esta pagina simula Shopify para validar que el widget cargue como
+          script publico y consulte el endpoint del asistente.
+        </p>
+        <div class="grid">
+          <div class="item">
+            <strong>Enfriadores</strong>
+            <p>Equipos comerciales para exhibicion y conservacion.</p>
+          </div>
+          <div class="item">
+            <strong>Congeladores</strong>
+            <p>Opciones verticales y horizontales para negocio.</p>
+          </div>
+          <div class="item">
+            <strong>Basculas</strong>
+            <p>Herramientas de venta y operacion comercial.</p>
+          </div>
+        </div>
+      </section>
+      <aside class="panel">
+        <p>
+          Abre el boton "Barry" en la esquina inferior derecha y pregunta
+          por disponibilidad, precio o recomendaciones.
+        </p>
+      </aside>
+    </main>
+
+    <script
+      src="/shopify-assistant.js"
+      data-store-name="Barradas"
+      data-assistant-name="Barry"
+      defer
+    ></script>
+  </body>
+</html>
