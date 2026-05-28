@@ -5,24 +5,105 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const allowedOrigin = process.env.SHOPIFY_ASSISTANT_ALLOWED_ORIGIN || '*';
+const DEFAULT_ADVISOR_PHONE = '522281335996';
+const FALLBACK_TICKET_MESSAGE =
+  'Hola, vengo de la pagina de Barradas y busco asesoria personalizada.';
+const TICKET_FIELD_LABELS = {
+  need: 'Necesidad',
+  category: 'Categoria',
+  supportType: 'Tipo de soporte',
+  useCase: 'Uso o contexto',
+  urgency: 'Urgencia',
+  budget: 'Presupuesto',
+};
 
-function getAdvisorUrl() {
-  if (process.env.SHOPIFY_ASSISTANT_ADVISOR_URL) {
-    return process.env.SHOPIFY_ASSISTANT_ADVISOR_URL;
+function normalizeWhatsappPhone(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+
+  if (digits.length === 10) {
+    return `52${digits}`;
   }
 
-  const phone = (process.env.SHOPIFY_ASSISTANT_WHATSAPP_PHONE || '').replace(
-    /\D/g,
-    ''
+  return digits || DEFAULT_ADVISOR_PHONE;
+}
+
+function cleanTicketValue(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim().slice(0, 160);
+}
+
+function normalizeGuidedTicket(ticket = {}) {
+  return Object.entries(TICKET_FIELD_LABELS)
+    .map(([key, label]) => ({
+      key,
+      label,
+      value: cleanTicketValue(ticket[key]),
+    }))
+    .filter((item) => item.value);
+}
+
+function buildTicketMessageFromEntries(entries) {
+  if (!entries || entries.length < 2) {
+    return FALLBACK_TICKET_MESSAGE;
+  }
+
+  return [
+    'Hola, vengo de la pagina de Barradas y busco asesoria personalizada.',
+    '',
+    'Ticket del cliente:',
+    ...entries.map((entry) => `${entry.label}: ${entry.value}`),
+  ].join('\n');
+}
+
+function buildTicketMessage(message) {
+  const cleanMessage = String(message || '').replace(/\s+/g, ' ').trim();
+  const wordCount = cleanMessage.split(' ').filter(Boolean).length;
+
+  if (cleanMessage.length < 12 || wordCount < 3) {
+    return FALLBACK_TICKET_MESSAGE;
+  }
+
+  return [
+    'Hola, vengo de la pagina de Barradas y busco asesoria personalizada.',
+    '',
+    'Ticket del cliente:',
+    `Solicitud: ${cleanMessage.slice(0, 700)}`,
+  ].join('\n');
+}
+
+function addTicketToAdvisorUrl(url, ticketMessage) {
+  try {
+    const parsedUrl = new URL(url);
+    const isWhatsappUrl =
+      parsedUrl.hostname.includes('wa.me') ||
+      parsedUrl.hostname.includes('whatsapp.com');
+
+    if (isWhatsappUrl) {
+      parsedUrl.searchParams.set('text', ticketMessage);
+    }
+
+    return parsedUrl.toString();
+  } catch {
+    return url;
+  }
+}
+
+function getAdvisorUrl({ message, ticketEntries } = {}) {
+  const ticketMessage = ticketEntries
+    ? buildTicketMessageFromEntries(ticketEntries)
+    : buildTicketMessage(message);
+
+  if (process.env.SHOPIFY_ASSISTANT_ADVISOR_URL) {
+    return addTicketToAdvisorUrl(
+      process.env.SHOPIFY_ASSISTANT_ADVISOR_URL,
+      ticketMessage
+    );
+  }
+
+  const phone = normalizeWhatsappPhone(
+    process.env.SHOPIFY_ASSISTANT_WHATSAPP_PHONE || DEFAULT_ADVISOR_PHONE
   );
 
-  if (!phone) return null;
-
-  const text = encodeURIComponent(
-    'Hola, vengo de la pagina de Barradas y quiero hablar con un asesor.'
-  );
-
-  return `https://wa.me/${phone}?text=${text}`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(ticketMessage)}`;
 }
 
 function corsHeaders() {
@@ -63,6 +144,32 @@ export async function POST(request) {
     );
   }
 
+  const mode = String(payload.mode || '').trim();
+  const ticketEntries = normalizeGuidedTicket(payload.ticket);
+
+  if (mode === 'guided-ticket' || ticketEntries.length > 0) {
+    const hasEnoughTicket = ticketEntries.length >= 2;
+
+    return jsonResponse({
+      answer: hasEnoughTicket
+        ? 'Listo. Prepare un ticket para el asesor digital con tus respuestas.'
+        : 'Listo. Te paso con el asesor digital para atencion personalizada.',
+      intent: 'guided_handoff',
+      products: [],
+      suggestions: [],
+      ticket: ticketEntries,
+      assistant: {
+        name: 'Barry',
+        avatar: '/barry-avatar.png',
+      },
+      handoff: {
+        recommended: true,
+        label: 'Contactar asesor digital',
+        url: getAdvisorUrl({ ticketEntries }),
+      },
+    });
+  }
+
   const message = String(payload.message || '').trim();
 
   if (!message) {
@@ -78,7 +185,7 @@ export async function POST(request) {
       message,
       products,
       shopDomain: SHOP_DOMAIN,
-      advisorUrl: getAdvisorUrl(),
+      advisorUrl: getAdvisorUrl({ message }),
     });
 
     return jsonResponse({

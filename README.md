@@ -176,19 +176,39 @@ Los PDFs estan pensados para compartir una lectura rapida, no para reemplazar un
 ## MVP de asistente para Shopify
 
 La app incluye un primer MVP de asistente virtual para la tienda. El asistente
-se llama Barry y usa un icono de pinguino como mascota:
+se llama Barry y usa un icono de pinguino como mascota.
+
+Barry ya no funciona como conversacion abierta. Ahora usa un flujo guiado de
+opciones multiples para que el cliente elija lo que necesita y, al final, se
+genere un ticket para el asesor digital.
 
 - Pagina interna de prueba: `http://localhost:3000/assistant`
 - Preview del widget: `http://localhost:3000/assistant-widget-preview.html`
 - Endpoint: `POST /api/shopify-assistant`
 - Widget publico: `/shopify-assistant.js`
 
-El asistente lee el catalogo real de Shopify, busca coincidencias por nombre,
-categoria, etiquetas, descripcion, SKU/modelos y escritura aproximada. Devuelve
-recomendaciones con precio, disponibilidad, imagen y link al producto.
+El flujo pregunta por datos como:
 
-Si el cliente pide un humano, asesor, WhatsApp, llamada o contacto, Barry deja
-de recomendar productos y muestra la accion de contacto con asesor.
+- Necesidad principal.
+- Categoria o tipo de soporte.
+- Uso o contexto.
+- Urgencia.
+- Presupuesto.
+
+Con esas respuestas, Barry arma un mensaje de WhatsApp para el asesor digital.
+El WhatsApp por defecto del asesor es:
+
+```text
+2281335996
+```
+
+El link de WhatsApp se genera con lada de Mexico (`52`) y un ticket prellenado.
+Si el cliente completo suficientes opciones, el ticket incluye esas respuestas.
+Si no hay suficiente informacion, el mensaje base es:
+
+```text
+Hola, vengo de la pagina de Barradas y busco asesoria personalizada.
+```
 
 Para incrustarlo en Shopify despues de desplegar la app:
 
@@ -221,14 +241,13 @@ Variables opcionales:
 ```env
 SHOPIFY_STOREFRONT_DOMAIN=barradas.mx
 SHOPIFY_ASSISTANT_ALLOWED_ORIGIN=https://barradas.mx
-SHOPIFY_ASSISTANT_ADVISOR_URL=https://wa.me/52NUMERO?text=Hola%2C%20quiero%20hablar%20con%20un%20asesor
+SHOPIFY_ASSISTANT_WHATSAPP_PHONE=522281335996
 ```
 
-Como alternativa a `SHOPIFY_ASSISTANT_ADVISOR_URL`, se puede configurar solo el
-telefono:
+Como alternativa, se puede configurar una URL completa:
 
 ```env
-SHOPIFY_ASSISTANT_WHATSAPP_PHONE=52NUMERO
+SHOPIFY_ASSISTANT_ADVISOR_URL=https://wa.me/522281335996
 ```
 
 Si no se configura `SHOPIFY_STOREFRONT_DOMAIN`, los links de productos usan

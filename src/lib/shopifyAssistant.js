@@ -62,7 +62,7 @@ const INTENT_PATTERNS = {
   lowPrice: /\b(barato|economico|economica|accesible|presupuesto)\b/i,
   stock: /\b(stock|disponible|inventario|existencia|hay|tienen|tendras|tendran)\b/i,
   handoff:
-    /\b(whatsapp|asesor|asesora|humano|humana|vendedor|vendedora|contacto|llamar|llamada|cotizar|cotizacion|ayuda humana|persona|agente|representante)\b/i,
+    /\b(whatsapp|asesor|asesora|asesoria|asesoria personalizada|humano|humana|vendedor|vendedora|contacto|llamar|llamada|cotizar|cotizacion|ayuda humana|persona|agente|representante|soporte)\b/i,
 };
 
 function stripHtml(value = '') {
@@ -573,14 +573,11 @@ function detectIntent(message) {
 
 function buildAnswer({ intent, matches, categories, tokens }) {
   if (intent === 'handoff') {
-    return 'Claro, soy Barry. Te paso con un asesor de Barradas para que te atiendan directamente.';
+    return 'Claro, soy Barry. Te dejo el WhatsApp del asesor digital de Barradas con un ticket listo para enviar.';
   }
 
-  if (matches.length === 0 && tokens.length > 0) {
-    const categoryText = categories.length
-      ? ` Tambien puedes buscar por categorias como ${categories.slice(0, 3).join(', ')}.`
-      : '';
-    return `No encontre una coincidencia clara en el catalogo activo.${categoryText} Prueba con el tipo de producto, medida, marca o uso que necesitas.`;
+  if (matches.length === 0 && tokens.length > 0 && intent !== 'greeting') {
+    return 'No encontre una respuesta clara en mi base del catalogo. Te dirijo con el asesor digital de Barradas para que revise tu solicitud personalmente.';
   }
 
   if (matches.length === 0) {
@@ -637,7 +634,7 @@ export function createAssistantReply({
       },
       handoff: {
         recommended: true,
-        label: 'Hablar con asesor',
+        label: 'Contactar asesor digital',
         url: advisorUrl,
       },
     };
@@ -681,6 +678,9 @@ export function createAssistantReply({
   const matches = scoredProducts.map((entry) =>
     summarizeProduct(entry.product, shopDomain, entry.reason)
   );
+  const shouldHandoff =
+    intent === 'handoff' ||
+    (intent !== 'greeting' && tokens.length > 0 && matches.length === 0);
 
   return {
     answer: buildAnswer({ intent, matches, categories, tokens }),
@@ -692,8 +692,8 @@ export function createAssistantReply({
       avatar: '/barry-avatar.png',
     },
     handoff: {
-      recommended: intent === 'handoff' || (tokens.length > 0 && matches.length === 0),
-      label: 'Hablar con asesor',
+      recommended: shouldHandoff,
+      label: 'Contactar asesor digital',
       url: advisorUrl,
     },
   };

@@ -57,9 +57,9 @@ export default async function AssistantPage() {
           Barry, asistente Shopify
         </h1>
         <p className="max-w-2xl text-sm text-slate-400">
-          MVP de asistente virtual para la pagina de Shopify. Barry recomienda
-          productos, entiende modelos escritos con errores y puede derivar con
-          un asesor.
+          MVP de asistente guiado para la pagina de Shopify. Barry ya no usa
+          conversacion abierta: guia al cliente con opciones multiples y crea
+          un ticket para el asesor digital.
         </p>
       </div>
 
@@ -71,9 +71,9 @@ export default async function AssistantPage() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat title="Productos leidos" value={stats.total} detail="Desde Shopify Admin API" />
-        <Stat title="Activos" value={stats.active} detail="Base de recomendacion" />
-        <Stat title="Con imagen" value={stats.withImages} detail="Mejor tarjeta visual" />
-        <Stat title="Con precio" value={stats.withPrices} detail="Listos para comparar" />
+        <Stat title="Activos" value={stats.active} detail="Contexto comercial" />
+        <Stat title="Con imagen" value={stats.withImages} detail="Catalogo visual" />
+        <Stat title="Con precio" value={stats.withPrices} detail="Datos disponibles" />
       </div>
 
       <AssistantDemo />
