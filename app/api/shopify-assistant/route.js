@@ -4,7 +4,10 @@ import { createAssistantReply } from '../../../src/lib/shopifyAssistant';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const allowedOrigin = process.env.SHOPIFY_ASSISTANT_ALLOWED_ORIGIN || '*';
+const allowedOrigins = (process.env.SHOPIFY_ASSISTANT_ALLOWED_ORIGIN || '*')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 const DEFAULT_ADVISOR_PHONE = '522281335996';
 const FALLBACK_TICKET_MESSAGE =
   'Hola, vengo de la pagina de Barradas y busco asesoria personalizada.';
@@ -106,29 +109,44 @@ function getAdvisorUrl({ message, ticketEntries } = {}) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(ticketMessage)}`;
 }
 
-function corsHeaders() {
+function getAllowedOrigin(request) {
+  if (allowedOrigins.includes('*')) return '*';
+
+  const requestOrigin = request?.headers?.get('origin');
+
+  if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+    return requestOrigin;
+  }
+
+  return allowedOrigins[0] || '*';
+}
+
+function corsHeaders(request) {
+  const origin = getAllowedOrigin(request);
+
   return {
-    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
+    ...(origin === '*' ? {} : { Vary: 'Origin' }),
   };
 }
 
-function jsonResponse(body, init = {}) {
+function jsonResponse(body, init = {}, request = null) {
   return Response.json(body, {
     ...init,
     headers: {
-      ...corsHeaders(),
+      ...corsHeaders(request),
       ...(init.headers || {}),
     },
   });
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(request) {
   return new Response(null, {
     status: 204,
-    headers: corsHeaders(),
+    headers: corsHeaders(request),
   });
 }
 
@@ -140,7 +158,8 @@ export async function POST(request) {
   } catch {
     return jsonResponse(
       { error: 'Envia un JSON valido con el campo message.' },
-      { status: 400 }
+      { status: 400 },
+      request
     );
   }
 
@@ -150,24 +169,28 @@ export async function POST(request) {
   if (mode === 'guided-ticket' || ticketEntries.length > 0) {
     const hasEnoughTicket = ticketEntries.length >= 2;
 
-    return jsonResponse({
-      answer: hasEnoughTicket
-        ? 'Listo. Prepare un ticket para el asesor digital con tus respuestas.'
-        : 'Listo. Te paso con el asesor digital para atencion personalizada.',
-      intent: 'guided_handoff',
-      products: [],
-      suggestions: [],
-      ticket: ticketEntries,
-      assistant: {
-        name: 'Barry',
-        avatar: '/barry-avatar.png',
+    return jsonResponse(
+      {
+        answer: hasEnoughTicket
+          ? 'Listo. Prepare un ticket para el asesor digital con tus respuestas.'
+          : 'Listo. Te paso con el asesor digital para atencion personalizada.',
+        intent: 'guided_handoff',
+        products: [],
+        suggestions: [],
+        ticket: ticketEntries,
+        assistant: {
+          name: 'Barry',
+          avatar: '/barry-avatar.png',
+        },
+        handoff: {
+          recommended: true,
+          label: 'Contactar asesor digital',
+          url: getAdvisorUrl({ ticketEntries }),
+        },
       },
-      handoff: {
-        recommended: true,
-        label: 'Contactar asesor digital',
-        url: getAdvisorUrl({ ticketEntries }),
-      },
-    });
+      {},
+      request
+    );
   }
 
   const message = String(payload.message || '').trim();
@@ -175,7 +198,8 @@ export async function POST(request) {
   if (!message) {
     return jsonResponse(
       { error: 'Escribe una pregunta para el asistente.' },
-      { status: 400 }
+      { status: 400 },
+      request
     );
   }
 
@@ -188,13 +212,17 @@ export async function POST(request) {
       advisorUrl: getAdvisorUrl({ message }),
     });
 
-    return jsonResponse({
-      ...reply,
-      catalog: {
-        productsRead: products.length,
-        source: 'shopify',
+    return jsonResponse(
+      {
+        ...reply,
+        catalog: {
+          productsRead: products.length,
+          source: 'shopify',
+        },
       },
-    });
+      {},
+      request
+    );
   } catch (error) {
     console.error('Error en shopify-assistant:', error);
 
@@ -203,7 +231,8 @@ export async function POST(request) {
         error:
           'No pude leer el catalogo de Shopify en este momento. Revisa la conexion y vuelve a intentar.',
       },
-      { status: 500 }
+      { status: 500 },
+      request
     );
   }
 }

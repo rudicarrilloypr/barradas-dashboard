@@ -240,7 +240,7 @@ Variables opcionales:
 
 ```env
 SHOPIFY_STOREFRONT_DOMAIN=barradas.mx
-SHOPIFY_ASSISTANT_ALLOWED_ORIGIN=https://barradas.mx
+SHOPIFY_ASSISTANT_ALLOWED_ORIGIN=https://barradas.mx,https://www.barradas.mx
 SHOPIFY_ASSISTANT_WHATSAPP_PHONE=522281335996
 ```
 
